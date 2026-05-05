@@ -1,12 +1,87 @@
-*,
-*::after,
-*::before {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-html,
 body {
-  display: block;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 40px;
+  color: #222;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.select {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  margin-bottom: 25px;
+}
+
+.select:focus {
+  border-color: #999;
+}
+
+.info p {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+hr {
+  margin: 30px 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.details p {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.details span {
+  color: #555;
+}
+
+.btn {
+  margin-top: 25px;
+  padding: 15px 25px;
+  font-size: 16px;
+  background: #bfbfbf;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: 0 4px 0 #a5a5a5;
+  transition: all 0.2s ease;
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #a5a5a5;
+}
+
+.btn.enabled {
+  background: #4CAF50;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #3e8e41;
 }

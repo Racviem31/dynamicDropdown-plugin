@@ -72,7 +72,37 @@ class DynamicDropdown
         ob_start();
         ?>
         //Верстка шорткода
+        <div class="container">
+        <h1>Изготовление технического паспорта</h1>
+
+        <p class="subtitle">
+            Пожалуйста, выберите объект для изготовления технического паспорта:
+        </p>
+
+        <select class="select">
+            <option>Выберите объект</option>
+            <option>Квартира</option>
+            <option>Дом</option>
+            <option>Коммерческое помещение</option>
+        </select>
+
+        <div class="info">
+            <p>Получение технического паспорта:</p>
+            <p>Постановка на государственный кадастровый учет:</p>
+        </div>
+
+        <hr>
+
+        <div class="details">
+            <p>Срок изготовления: <span>-</span></p>
+            <p>Стоимость услуги: <span>-</span></p>
+        </div>
+
+        <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
+        </div>
         <?php
+
+        
 
         return ob_get_clean();
     }
