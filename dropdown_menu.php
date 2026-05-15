@@ -21,7 +21,7 @@ class DynamicDropdown
             $this -> plugin_url = plugin_dir_url(__FILE__);
             $this -> plugin_path = plugin_dir_path(__FILE__);
             //Регистрация шорткода
-            add_shorcode('dynamic_dropdown', array($this, 'render_shortcode'));
+            add_shortcode('dynamic_dropdown', array($this, 'render_shortcode'));
             //Подключение скриптов и стилей
             add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
     }
@@ -39,7 +39,7 @@ class DynamicDropdown
                 '1.0.0'
             );
             //Подключаем основной скрипт
-            wp_enqueue_scripts(
+            wp_enqueue_script(
                 'dynamic-dropdown-script',
                 $this -> plugin_url . 'assets/js/script.js',
                 array(),
@@ -54,11 +54,16 @@ class DynamicDropdown
             ));
         }
     }
-    //Данные дропдауна вывести лучше в админку в настройки плагина
+    //Данные дропдауна вывести лучше в админку в настройки плагинаыы
 
     private function get_dropdown_data()
     {
-        return array();
+        return array(
+            array(
+                'id' => '',
+                'name' => '',
+            )
+        );
     }
 
     //Рендер шорткода
@@ -70,8 +75,8 @@ class DynamicDropdown
         ), $atts);
         //Буферизация вывода
         ob_start();
-        ?>
         //Верстка шорткода
+        ?>
         <div class="container">
         <h1>Изготовление технического паспорта</h1>
 
@@ -101,8 +106,6 @@ class DynamicDropdown
         <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
         </div>
         <?php
-
-        
 
         return ob_get_clean();
     }
