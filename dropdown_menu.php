@@ -85,7 +85,7 @@ class DynamicDropdown
         </p>
 
         <select class="select">
-            <option>Выберите объект</option>
+            <option hidden disabled selected>Выберите объект</option>
             <option>Квартира</option>
             <option>Дом</option>
             <option>Коммерческое помещение</option>
