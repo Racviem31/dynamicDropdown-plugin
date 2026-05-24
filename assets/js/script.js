@@ -5,8 +5,6 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const select = document.getElementById('dynamic-select');
-    if (!select) return;
-
     const deadlineSpan = document.querySelector('.deadline-value');
     const priceSpan = document.querySelector('.price-value');
     const infoItems = document.querySelectorAll('.info p');
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return !option || !option.hasAttribute('data-deadline') || !option.hasAttribute('data-price');
     }
 
-    function updateDetails() {
+    function updateDetailsForSelect() {
         const selectedOption = select.options[select.selectedIndex];
         const placeholder = isPlaceholder(selectedOption);
 
@@ -55,9 +53,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Вызываем один раз при загрузке (ничего не добавит, т.к. плейсхолдер)
-    updateDetails();
+    function addDaToInfo() {
+        // Добавляем "да" ко всем пунктам info (без условий)
+        infoItems.forEach(p => {
+            const original = p.getAttribute('data-original-text');
+            if (original && !original.endsWith(' да')) {
+                p.innerHTML = original + ' да';
+            }
+        });
+    }
 
-    // Слушаем изменения
-    select.addEventListener('change', updateDetails);
+    if (select) {
+        // Если селект есть – работаем по событиям
+        updateDetailsForSelect(); // инициализация (плейсхолдер, да нет)
+        select.addEventListener('change', updateDetailsForSelect);
+    } else {
+        // Если селекта нет – сразу добавляем "да" и устанавливаем фиксированные срок/цену (если есть)
+        // Предполагаем, что deadline-value и price-value могут быть статическими (без селекта)
+        // Если они есть – оставляем как есть (они уже заполнены из PHP)
+        addDaToInfo();
+    }
 });
