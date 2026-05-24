@@ -45,9 +45,8 @@ class DynamicDropdown
         }
     }
 
-    /**
-     * Загружает данные из JSON-файла и возвращает массив
-     */
+    //Загружает данные из JSON-файла и возвращает массив
+
     private function load_json_data()
     {
         $json_file = $this->plugin_path . 'data.json';
@@ -60,9 +59,9 @@ class DynamicDropdown
         return is_array($data) ? $data : [];
     }
 
-    /**
-     * Получает данные, соответствующие текущему URL страницы
-     */
+=
+    //Получает данные, соответствующие текущему URL страницы
+
     private function get_data_for_current_url()
     {
         $all_data = $this->load_json_data();
@@ -87,9 +86,8 @@ class DynamicDropdown
         return null;
     }
 
-    /**
-     * Рендер шорткода с данными из JSON в зависимости от URL
-     */
+    //Рендер шорткода с данными из JSON в зависимости от URL
+
     public function render_shortcode($atts)
     {
         $atts = shortcode_atts(array(
@@ -106,50 +104,59 @@ class DynamicDropdown
             'Получение технического паспорта:',
             'Постановка на государственный кадастровый учет:'
         ];
-        
-        // Получаем массив опций (если нет — используем старые с пустыми ценой/сроком)
-        $options = $data['options'] ?? null;
-        if (!$options) {
-            // fallback для обратной совместимости
-            $default_names = ['Квартира', 'Дом', 'Коммерческое помещение'];
-            $options = array_map(function($name) {
-                return [
-                    'name' => $name,
-                    'deadline' => '-',
-                    'price' => '-'
-                ];
-            }, $default_names);
-        }
 
         ob_start();
         ?>
         <div class="container">
             <h1><?php echo esc_html($title); ?></h1>
-            <p class="subtitle"><?php echo esc_html($subtitle); ?></p>
 
-            <select class="select" id="dynamic-select">
-                <option hidden disabled selected>Выберите объект</option>
-                <?php foreach ($options as $index => $opt): ?>
-                    <option value="<?php echo esc_attr($index); ?>"
-                            data-deadline="<?php echo esc_attr($opt['deadline']); ?>"
-                            data-price="<?php echo esc_attr($opt['price']); ?>">
-                        <?php echo esc_html($opt['name']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <?php if (isset($data['options']) && is_array($data['options']) && !empty($data['options'])): ?>
+                <p class="subtitle"><?php echo esc_html($subtitle); ?></p>
+                <!-- Вариант с селектом (есть options) -->
+                <?php $options = $data['options']; ?>
+                <select class="select" id="dynamic-select">
+                    <option hidden disabled selected>Выберите объект</option>
+                    <?php foreach ($options as $index => $opt): ?>
+                        <option value="<?php echo esc_attr($index); ?>"
+                                data-deadline="<?php echo esc_attr($opt['deadline'] ?? '-'); ?>"
+                                data-price="<?php echo esc_attr($opt['price'] ?? '-'); ?>">
+                            <?php echo esc_html($opt['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
-            <div class="info">
+                <div class="info">
                 <?php foreach ($info_lines as $line): ?>
                     <p><?php echo esc_html($line); ?></p>
                 <?php endforeach; ?>
-            </div>
+                </div>
 
-            <hr style="width: 70%">
+                <hr style="width: 70%">
 
-            <div class="details">
-                <p>Срок изготовления: <span class="deadline-value">-</span></p>
-                <p>Стоимость услуги: <span class="price-value">-</span></p>
-            </div>
+                <div class="details">
+                    <p>Срок изготовления: <span class="deadline-value">-</span></p>
+                    <p>Стоимость услуги: <span class="price-value">-</span></p>
+                </div>
+            <?php else: ?>
+                <!-- Вариант без селекта (нет options) – используем deadline и price из корня JSON -->
+                <?php
+                $deadline = $data['deadline'] ?? '-';
+                $price = $data['price'] ?? '-';
+                ?>
+
+                <div class="info">
+                <?php foreach ($info_lines as $line): ?>
+                    <p><?php echo esc_html($line); ?></p>
+                <?php endforeach; ?>
+                </div>
+
+                <hr style="width: 70%">
+
+                <div class="details">
+                    <p>Срок изготовления: <span><?php echo esc_html($deadline); ?></span></p>
+                    <p>Стоимость услуги: <span><?php echo esc_html($price); ?></span></p>
+                </div>
+            <?php endif; ?>
 
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
         </div>

@@ -1,6 +1,6 @@
 [
     {
-        "url": "https://bti19.ru/test/",
+        "url": "https://bti19.ru/test1/",
         "title": "Тест!",
         "subtitle": "Выберите тип квартиры",
         "info_lines": [
@@ -44,6 +44,15 @@
                 "deadline": "10 дней",
                 "price": "12 000 руб."
             }
+        ]
+    },
+    {
+        "url": "https://bti19.ru/test/",
+        "title": "Фиксированная услуга",
+        "deadline": "10 дней",
+        "price": "7 500 руб.",
+        "info_lines": [
+            "Выезд специалиста: да"
         ]
     }
 ]
