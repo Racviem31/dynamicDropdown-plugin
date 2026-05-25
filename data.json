@@ -259,7 +259,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/spravki-o-ploshchadyah-i-iznose-konstrukciy#ac-119/",
+        "url": "https://bti19.ru/spravki-o-ploshchadyah-i-iznose-konstrukciy/",
         "title": "Справки о площадях и износе конструкций",
         "subtitle": "Пожалуйста, выберите нужную вам услугу:",
         "info_lines": [
@@ -301,6 +301,15 @@
                 "deadline": "от 3 дней",
                 "price": "от 10 000 ₽."
             }
+        ]
+    },
+        {
+        "url": "https://bti19.ru/pereplanirovka-kvartir/",
+        "title": "Согласование перепланировки в административном порядке",
+        "deadline": "от 30 дней",
+        "price": "от 10 000 ₽.",
+        "info_lines": [
+            "Помощь по полному согласованию документации с Администрацией и получение разрешения на перепланировку: да"
         ]
     }
 ]
