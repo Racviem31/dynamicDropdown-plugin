@@ -90,8 +90,8 @@ class DynamicDropdown
     /**
      * Рендер шорткода с данными из JSON в зависимости от URL
      */
-public function render_shortcode($atts)
-{
+    public function render_shortcode($atts)
+    {
     $atts = shortcode_atts(array(
         'height'   => '100px',
         'position' => 'center',

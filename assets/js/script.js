@@ -1,6 +1,6 @@
 /**
  * Скрипт для плагина DynamicDropdown
- * Версия 1.0.0
+ * Версия 1.1.0
  */
 
 document.addEventListener('DOMContentLoaded', function() {
