@@ -4,31 +4,34 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Первый вариант (селект) ---
-    const select = document.getElementById('dynamic-select');
-    if (select) {
-        initVariant1(select);
-        return; // если нашли селект, дальше не идём (чтоб не мешать)
-    }
-    
-    // --- Второй вариант (чекбоксы) ---
-    const variant2Container = document.querySelector('.container[data-variant="2"]');
-    if (variant2Container) {
-        initVariant2(variant2Container);
-        return;
-    }
-    
-    // --- Страницы без селекта (статика) ---
-    const infoItems = document.querySelectorAll('.info p');
-    if (infoItems.length) {
-        addDaToInfoStatic();
-    }
+    const containers = document.querySelectorAll('.dynamic-dropdown');
+    containers.forEach(container => {
+        const variant = container.getAttribute('data-variant');
+        if (variant === '1') {
+            initVariant1(container);
+        } else if (variant === '2') {
+            initVariant2(container);
+        } else {
+            // fallback: проверяем наличие селекта или чекбоксов
+            if (container.querySelector('.dynamic-select')) {
+                initVariant1(container);
+            } else if (container.querySelector('input[type="checkbox"]')) {
+                initVariant2(container);
+            } else {
+                // статический вариант без options – добавляем "да"
+                addDaToInfoStatic(container);
+            }
+        }
+    });
 });
 
-function initVariant1(select) {
-    const deadlineSpan = document.querySelector('.deadline-value');
-    const priceSpan = document.querySelector('.price-value');
-    const infoItems = document.querySelectorAll('.info p');
+function initVariant1(container) {
+    const select = container.querySelector('.dynamic-select');
+    if (!select) return;
+
+    const deadlineSpan = container.querySelector('.deadline-value');
+    const priceSpan = container.querySelector('.price-value');
+    const infoItems = container.querySelectorAll('.info p');
 
     // Сохраняем оригинальные тексты info
     infoItems.forEach(p => {
@@ -41,7 +44,7 @@ function initVariant1(select) {
         return !option || !option.hasAttribute('data-deadline') || !option.hasAttribute('data-price');
     }
 
-    function updateDetailsForSelect() {
+    function updateDetails() {
         const selectedOption = select.options[select.selectedIndex];
         const placeholder = isPlaceholder(selectedOption);
 
@@ -63,13 +66,15 @@ function initVariant1(select) {
             } else {
                 if (!original.endsWith(' да')) {
                     p.innerHTML = original + ' да';
+                } else {
+                    p.innerHTML = original;
                 }
             }
         });
     }
 
-    updateDetailsForSelect();
-    select.addEventListener('change', updateDetailsForSelect);
+    updateDetails();
+    select.addEventListener('change', updateDetails);
 }
 
 function initVariant2(container) {
@@ -79,24 +84,19 @@ function initVariant2(container) {
     const checkAllBtn = container.querySelector('.check-all-btn');
     const uncheckAllBtn = container.querySelector('.uncheck-all-btn');
 
-    // Функция извлечения числа из строки типа "от 7 дней" или "от 6 000 ₽."
     function extractNumber(str) {
         if (!str) return 0;
-        // убираем "от", пробелы, "дней", "₽", точку, оставляем только цифры и пробелы
         let match = str.match(/(\d[\d\s]*)/);
         if (match) {
-            // убираем пробелы внутри числа
             return parseInt(match[1].replace(/\s/g, ''), 10);
         }
         return 0;
     }
 
-    // Форматирование цены обратно в "от X ₽"
     function formatPrice(sum) {
         return 'от ' + sum.toLocaleString('ru-RU') + ' ₽.';
     }
 
-    // Форматирование срока: "от X дней"
     function formatDeadline(maxDays) {
         return 'от ' + maxDays + ' дней';
     }
@@ -104,53 +104,26 @@ function initVariant2(container) {
     function recalcTotals() {
         let maxDeadline = 0;
         let totalPrice = 0;
-        
         checkboxes.forEach(cb => {
             if (cb.checked) {
-                const deadlineStr = cb.getAttribute('data-deadline');
-                const priceStr = cb.getAttribute('data-price');
-                const deadlineNum = extractNumber(deadlineStr);
-                const priceNum = extractNumber(priceStr);
+                const deadlineNum = extractNumber(cb.getAttribute('data-deadline'));
+                const priceNum = extractNumber(cb.getAttribute('data-price'));
                 if (deadlineNum > maxDeadline) maxDeadline = deadlineNum;
                 totalPrice += priceNum;
             }
         });
-        
-        if (totalDeadlineSpan) {
-            totalDeadlineSpan.textContent = maxDeadline > 0 ? formatDeadline(maxDeadline) : '-';
-        }
-        if (totalPriceSpan) {
-            totalPriceSpan.textContent = totalPrice > 0 ? formatPrice(totalPrice) : '-';
-        }
+        if (totalDeadlineSpan) totalDeadlineSpan.textContent = maxDeadline > 0 ? formatDeadline(maxDeadline) : '-';
+        if (totalPriceSpan) totalPriceSpan.textContent = totalPrice > 0 ? formatPrice(totalPrice) : '-';
     }
 
-    // Обработчики для чекбоксов
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', recalcTotals);
-    });
-
-    // Кнопка "Отметить все"
-    if (checkAllBtn) {
-        checkAllBtn.addEventListener('click', () => {
-            checkboxes.forEach(cb => { cb.checked = true; });
-            recalcTotals();
-        });
-    }
-
-    // Кнопка "Сбросить выбор"
-    if (uncheckAllBtn) {
-        uncheckAllBtn.addEventListener('click', () => {
-            checkboxes.forEach(cb => { cb.checked = false; });
-            recalcTotals();
-        });
-    }
-
-    // Первоначальный расчёт (если какие-то чекбоксы уже выбраны по умолчанию)
+    checkboxes.forEach(cb => cb.addEventListener('change', recalcTotals));
+    if (checkAllBtn) checkAllBtn.addEventListener('click', () => { checkboxes.forEach(cb => cb.checked = true); recalcTotals(); });
+    if (uncheckAllBtn) uncheckAllBtn.addEventListener('click', () => { checkboxes.forEach(cb => cb.checked = false); recalcTotals(); });
     recalcTotals();
 }
 
-function addDaToInfoStatic() {
-    const infoItems = document.querySelectorAll('.info p');
+function addDaToInfoStatic(container) {
+    const infoItems = container.querySelectorAll('.info p');
     infoItems.forEach(p => {
         const original = p.innerHTML;
         if (!original.endsWith(' да')) {

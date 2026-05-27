@@ -15,6 +15,7 @@ class DynamicDropdown
 {
     private $plugin_url;
     private $plugin_path;
+    private static $instance_counter = 0;
 
     public function __construct()
     {
@@ -93,13 +94,19 @@ class DynamicDropdown
     }
 
     return null;
-}
+    }
+
+
 
     /**
      * Рендер шорткода с данными из JSON в зависимости от URL
      */
     public function render_shortcode($atts)
     {
+        
+    self::$instance_counter++;
+    $instance_id = self::$instance_counter;
+    
     $atts = shortcode_atts(array(
         'height'   => '100px',
         'position' => 'center',
@@ -119,7 +126,7 @@ class DynamicDropdown
 
     ob_start();
     ?>
-    <div class="container" data-variant="<?php echo esc_attr($variant); ?>">
+    <div class="container dynamic-dropdown dynamic-dropdown-<?php echo $instance_id; ?>" data-variant="<?php echo $variant; ?>">
         <?php if (filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN)): ?>
             <h1><?php echo esc_html($title); ?></h1>
         <?php endif; ?>
@@ -170,10 +177,10 @@ class DynamicDropdown
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
 
         <?php elseif ($variant === 1 || !isset($data['options']) || empty($data['options'])): ?>
-            <!-- Первый вариант (селект или статика) – существующая логика -->
+            <!-- Первый вариант -->
             <?php if (isset($data['options']) && is_array($data['options']) && !empty($data['options'])): ?>
                 <p class="subtitle"><?php echo esc_html($subtitle); ?></p>
-                <select class="select" id="dynamic-select">
+                <select class="select dynamic-select">
                     <option hidden disabled selected>Выберите объект</option>
                     <?php foreach ($data['options'] as $index => $opt): ?>
                         <option value="<?php echo esc_attr($index); ?>"
