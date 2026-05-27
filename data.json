@@ -1,6 +1,6 @@
 [
     {
-        "url": "https://bti19.ru/technicheskiy-passport/",
+        "url": "https://bti19.ru/uslugi/technicheskiy-passport/",
         "title": "Изготовление технического паспорта",
         "subtitle": "Пожалуйста, выберите объект для изготовления технического паспорта:",
         "info_lines": [
@@ -42,7 +42,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/poetazhnyy-plan-i-eksplikaciya/",
+        "url": "https://bti19.ru/uslugi/poetazhnyy-plan-i-eksplikaciya/",
         "title": "Изготовлнение поэтажного плана и экспликации",
         "subtitle": "Пожалуйста, выберите объект для получения услуги:",
         "info_lines": [
@@ -77,7 +77,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/inventarizaciya-zelenyh-nasazhdeniy/",
+        "url": "https://bti19.ru/uslugi/inventarizaciya-zelenyh-nasazhdeniy/",
         "title": "Инвентаризация зеленых насаждений",
         "subtitle": "Пожалуйста, выберите количество насаждений для получения инвентаризации:",
         "info_lines": [
@@ -107,7 +107,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/kadastrovyy-tehnicheskiy-plan/",
+        "url": "https://bti19.ru/uslugi/kadastrovyy-tehnicheskiy-plan/",
         "title": "Изготовление технического плана в Хакассии",
         "subtitle": "Пожалуйста, выберите объект для получения технического плана:",
         "info_lines": [
@@ -147,7 +147,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/kadastrovyy-akt-likvidaciy/",
+        "url": "https://bti19.ru/uslugi/kadastrovyy-akt-likvidaciy/",
         "title": "Акт обследования (ликвидации)",
         "deadline": "от 2 дней",
         "price": "от 3 500 ₽.",
@@ -156,7 +156,7 @@
         ]
     },
     {   
-        "url": "https://bti19.ru/proektnaya-dokumentaciya/",
+        "url": "https://bti19.ru/uslugi/proektnaya-dokumentaciya/",
         "title": "Проектная документация",
         "subtitle": "Пожалуйста, выберите объект для получения услуги:",
         "info_lines": [
@@ -176,7 +176,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/koordinirovanie/",
+        "url": "https://bti19.ru/uslugi/koordinirovanie/",
         "title": "Проведение координирования",
         "deadline": "от 8 дней",
         "price": "от 10 000 ₽.",
@@ -185,7 +185,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/mezhevanie/",
+        "url": "https://bti19.ru/uslugi/mezhevanie/",
         "title": "Межевание земельного участка (постановка на кадастровый учет)",
         "subtitle": "Пожалуйста, выберите объект для получения услуги:",
         "info_lines": [
@@ -220,7 +220,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/mezhevoy-plan/",
+        "url": "https://bti19.ru/uslugi/mezhevoy-plan/",
         "title": "Изготовление межевого плана",
         "subtitle": "Пожалуйста, выберите объект для изготовления межевого плана:",
         "info_lines": [
@@ -250,7 +250,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/ustanovlenie-granic-zemelnogo-uchastka/",
+        "url": "https://bti19.ru/uslugi/ustanovlenie-granic-zemelnogo-uchastka/",
         "title": "Установление границ земельного участка",
         "deadline": "от 8 дней",
         "price": "от 10 000 ₽.",
@@ -259,7 +259,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/spravki-o-ploshchadyah-i-iznose-konstrukciy/",
+        "url": "https://bti19.ru/uslugi/spravki-o-ploshchadyah-i-iznose-konstrukciy/",
         "title": "Справки о площадях и износе конструкций",
         "subtitle": "Пожалуйста, выберите нужную вам услугу:",
         "info_lines": [
@@ -279,7 +279,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/izgotovlenie-zaklyucheniya-pozharnoy-bezopasnosi/",
+        "url": "https://bti19.ru/uslugi/izgotovlenie-zaklyucheniya-pozharnoy-bezopasnosi/",
         "title": "Экспертное заключение пожарной безпасности",
         "subtitle": "Пожалуйста, выберите объект для получения заключения:",
         "info_lines": [
@@ -304,7 +304,7 @@
         ]
     },
     {
-        "url": "https://bti19.ru/soglasovanie-pereplanirovki/",
+        "url": "https://bti19.ru/uslugi/soglasovanie-pereplanirovki/",
         "title": "Согласование перепланировки квартиры",
         "subtitle": "Вы можете заказать комплекс услуг или отдельные ее составляющие.",
         "options": [
@@ -331,7 +331,7 @@
         ]
     },
     {     
-        "url": "https://bti19.ru/uzakonenie-samostroya/",
+        "url": "https://bti19.ru/uslugi/uzakonenie-samostroya/",
         "service_id": "dosudeb",
         "title": "В административном(досудебном) порядке",
         "subtitle": "Вы можете заказать комплекс услуг или отдельные ее составляющие.",
@@ -349,7 +349,7 @@
         ]
     },
     {     
-        "url": "https://bti19.ru/uzakonenie-samostroya/",
+        "url": "https://bti19.ru/uslugi/uzakonenie-samostroya/",
         "service_id": "sudeb",
         "title": "В судебном порядке",
         "subtitle": "Вы можете заказать комплекс услуг или отдельные ее составляющие.",
@@ -372,7 +372,7 @@
         ]
     },
         {     
-        "url": "https://bti19.ru/uzakonenie-rekonstrukciy-i-pereplanirovok/",
+        "url": "https://bti19.ru/uslugi/uzakonenie-rekonstrukciy-i-pereplanirovok/",
         "service_id": "dosudeb1",
         "title": "В административном(досудебном) порядке",
         "subtitle": "Вы можете заказать комплекс услуг или отдельные ее составляющие.",
@@ -390,7 +390,7 @@
         ]
     },
     {     
-        "url": "https://bti19.ru/uzakonenie-rekonstrukciy-i-pereplanirovok/",
+        "url": "https://bti19.ru/uslugi/uzakonenie-rekonstrukciy-i-pereplanirovok/",
         "service_id": "sudeb1",
         "title": "В судебном порядке",
         "subtitle": "Вы можете заказать комплекс услуг или отдельные ее составляющие.",
