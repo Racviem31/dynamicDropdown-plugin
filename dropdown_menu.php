@@ -60,32 +60,40 @@ class DynamicDropdown
         return is_array($data) ? $data : [];
     }
 
-    /**
-     * Получает данные, соответствующие текущему URL страницы
+        /**
+     * Получает данные: либо по service_id, либо по текущему URL
      */
-    private function get_data_for_current_url()
+    private function get_data_for_current_url($service_key = '')
     {
-        $all_data = $this->load_json_data();
-        if (empty($all_data)) {
-            return null;
-        }
+    $all_data = $this->load_json_data();
+    if (empty($all_data)) {
+        return null;
+    }
 
-        // Получаем полный URL текущей страницы (без якоря и параметров)
-        $current_url = get_permalink();
-        if (!$current_url) {
-            // резерв: из серверных переменных
-            $current_url = home_url(add_query_arg(array(), $_SERVER['REQUEST_URI']));
-        }
-
-        // Ищем запись с совпадающим URL
+    // Если передан service_key – ищем по нему
+    if (!empty($service_key)) {
         foreach ($all_data as $item) {
-            if (isset($item['url']) && $item['url'] === $current_url) {
+            if (isset($item['service_id']) && $item['service_id'] === $service_key) {
                 return $item;
             }
         }
-
-        return null;
+        return null; // не найдено
     }
+
+    // Иначе ищем по URL (текущая логика)
+    $current_url = get_permalink();
+    if (!$current_url) {
+        $current_url = home_url(add_query_arg(array(), $_SERVER['REQUEST_URI']));
+    }
+
+    foreach ($all_data as $item) {
+        if (isset($item['url']) && $item['url'] === $current_url) {
+            return $item;
+        }
+    }
+
+    return null;
+}
 
     /**
      * Рендер шорткода с данными из JSON в зависимости от URL
@@ -95,10 +103,13 @@ class DynamicDropdown
     $atts = shortcode_atts(array(
         'height'   => '100px',
         'position' => 'center',
-        'variant'  => '1' // по умолчанию первый вариант
+        'variant'  => '1',
+        'service'  => '',
+        'show_title' => 'true' 
     ), $atts);
 
-    $data = $this->get_data_for_current_url();
+    $service_key = sanitize_text_field($atts['service']);
+    $data = $this->get_data_for_current_url($service_key); // передаём ключ
     $variant = (int)$atts['variant'];
 
     // Общие данные
@@ -109,7 +120,9 @@ class DynamicDropdown
     ob_start();
     ?>
     <div class="container" data-variant="<?php echo esc_attr($variant); ?>">
-        <h1><?php echo esc_html($title); ?></h1>
+        <?php if (filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN)): ?>
+            <h1><?php echo esc_html($title); ?></h1>
+        <?php endif; ?>
 
         <?php if ($variant === 2 && isset($data['options']) && is_array($data['options']) && !empty($data['options'])): ?>
             <!-- ВАРИАНТ 2: чекбоксы, множественный выбор -->
