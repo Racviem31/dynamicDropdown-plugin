@@ -258,6 +258,7 @@ class DynamicDropdown
                     <input type="tel" name="phone" placeholder="Номер телефона" required>
                     <textarea name="info" placeholder="Укажите необходимую информацию, которая может быть важна, или оставьте поле пустым"></textarea>
                     <input type="hidden" name="selected_service" id="selected-service" value="">
+                    <input type="hidden" name="service_title" id="service-title-field" value="">
                     <button type="submit" class="modal-submit-btn">Получить услугу</button>
                 </form>
             </div>
@@ -274,12 +275,30 @@ class DynamicDropdown
             wp_send_json_error('Ошибка безопасности. Обновите страницу и попробуйте снова.');
             wp_die();
         }
+        // Защита от спама: ограничение 10 заявок в час с одного IP
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $transient_key = 'service_requests_ip_' . md5($ip);
+        $request_count = get_transient($transient_key) ?: 0;
+        
+        if ($request_count >= 10) {
+            wp_send_json_error('Вы отправили слишком много заявок за последний час. Пожалуйста, повторите позже.');
+            wp_die();
+        }
     
         // Получаем данные из формы
         $name    = sanitize_text_field( $_POST['name'] );
         $phone   = sanitize_text_field( $_POST['phone'] );
         $info    = sanitize_textarea_field( $_POST['info'] );
-        $service = sanitize_textarea_field( $_POST['selected_service'] ?? '' ); // выбранный объект из селекта
+       $service_title = sanitize_text_field( $_POST['service_title'] ?? '' );
+        $selected_option = sanitize_textarea_field( $_POST['selected_service'] ?? '' );
+        
+        if ( $service_title && $selected_option ) {
+            $service = $service_title . ' — ' . $selected_option;
+        } elseif ( $service_title ) {
+            $service = $service_title;
+        } else {
+            $service = $selected_option;
+        }
     
         // Получаем email текущего города с помощью шорткода belingoGeo
         $email = 'hard.isti@bk.ru';
@@ -313,12 +332,13 @@ class DynamicDropdown
         // Отправляем письмо
         $sent = wp_mail( $email, $subject, $message, $headers );
     
-        if ( $sent ) {
-            wp_send_json_success( 'Ваша заявка успешно отправлена!' );
+        if ($sent) {
+            set_transient($transient_key, $request_count + 1, HOUR_IN_SECONDS);
+            wp_send_json_success('Ваша заявка успешно отправлена!');
         } else {
-            wp_send_json_error( 'Ошибка при отправке заявки. Попробуйте позже.' );
+            wp_send_json_error('Ошибка при отправке заявки. Попробуйте позже.');
         }
-    
+            
         wp_die();
     }
 }

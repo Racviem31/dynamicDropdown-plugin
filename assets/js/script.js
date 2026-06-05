@@ -46,11 +46,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.paddingRight = '';
     }
 
-    // Вешаем обработчики на все кнопки .btn внутри наших шорткодов
-    document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal();
+   document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // Находим контейнер текущего шорткода
+        const container = btn.closest('.dynamic-dropdown');
+        if (container) {
+            const titleElement = container.querySelector('h1');
+            const serviceTitle = titleElement ? titleElement.innerText.trim() : '';
+            const titleField = document.getElementById('service-title-field');
+            if (titleField) titleField.value = serviceTitle;
+        }
+
+        openModal();
         });
     });
 
@@ -90,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Произошла ошибка при отправке. Попробуйте позже.');
+                alert(' Произошла ошибка при отправке. Попробуйте позже.');
             });
         });
     }
