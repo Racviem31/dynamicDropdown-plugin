@@ -26,6 +26,7 @@ class DynamicDropdown
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action( 'wp_ajax_send_service_request', array( $this, 'ajax_send_request' ) );
         add_action( 'wp_ajax_nopriv_send_service_request', array( $this, 'ajax_send_request' ) );
+        
     }
 
     public function enqueue_assets()
@@ -302,6 +303,7 @@ class DynamicDropdown
     
         // Получаем email текущего города с помощью шорткода belingoGeo
         $email = 'hard.isti@bk.ru';
+        //$email = do_shortcode( '[belingogeo_city_content]' );
         // Если шорткод не вернул email, используем email по умолчанию
         if ( empty($email) ) {
             $email = get_option( 'admin_email' );
@@ -330,7 +332,8 @@ class DynamicDropdown
         $headers = array('Content-Type: text/html; charset=UTF-8');
     
         // Отправляем письмо
-        $sent = wp_mail( $email, $subject, $message, $headers );
+
+        $sent = wp_mail( $recipients, $subject, $message, $headers );
     
         if ($sent) {
             set_transient($transient_key, $request_count + 1, HOUR_IN_SECONDS);
