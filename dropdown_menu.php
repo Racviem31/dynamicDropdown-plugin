@@ -226,8 +226,37 @@ class DynamicDropdown
         <?php endif; ?>
     </div>
     <?php
+    echo $this->render_modal();
     return ob_get_clean();
     }
+    private static $modal_rendered = false;
+
+    private function render_modal() {
+        if (self::$modal_rendered) {
+            return '';
+        }
+        self::$modal_rendered = true;
+        ob_start();
+        ?>
+        <div id="service-modal" class="service-modal" style="display: none;">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <h2>Заявка на получение услуги</h2>
+                <p class="modal-subtitle">Пожалуйста, оставьте свои контактные данные, и мы свяжемся с вами в ближайшее время.</p>
+                <form class="modal-form">
+                    <input type="text" name="name" placeholder="Ваше имя" required>
+                    <input type="tel" name="phone" placeholder="Номер телефона" required>
+                    <textarea name="info" placeholder="Укажите необходимую информацию, которая может быть важна, или оставьте поле пустым"></textarea>
+                    <button type="submit" class="modal-submit-btn">Получить услугу</button>
+                </form>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
 }
+
+
     // Инициализация плагина
     new DynamicDropdown();  

@@ -146,3 +146,50 @@ function addDaToInfoStatic(container) {
         }
     });
 }
+
+// Модальное окно
+const modal = document.getElementById('service-modal');
+const modalOverlay = document.querySelector('.modal-overlay');
+const modalClose = document.querySelector('.modal-close');
+
+function getScrollbarWidth() {
+    return window.innerWidth - document.documentElement.clientWidth;
+}
+
+function openModal() {
+    if (!modal) return;
+    const scrollbarWidth = getScrollbarWidth();
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = scrollbarWidth + 'px';
+}
+
+function closeModal() {
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+}
+
+// Добавляем обработчики на все кнопки "ПОЛУЧИТЬ УСЛУГУ"
+document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+    });
+});
+
+// Закрытие по крестику
+if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+}
+// Закрытие по оверлею
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', closeModal);
+}
+// Закрытие по ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+        closeModal();
+    }
+});
