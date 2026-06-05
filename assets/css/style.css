@@ -4,23 +4,23 @@
 /* Контейнер плагина */
 .dynamic-dropdown {
     font-family: 'Nunito Sans', sans-serif;
-    color: #333333; 
+    color: #333333; /* базовый чёрный */
 }
 
-
+/* Заголовок и подзаголовок – жирные и чёрные */
 .dynamic-dropdown h1,
 .dynamic-dropdown .subtitle {
     font-weight: 800;
     color: #333333;
 }
 
-
+/* Все параграфы в .info и .details – чёрные */
 .dynamic-dropdown .info p,
 .dynamic-dropdown .details p {
     color: #333333;
 }
 
-
+/* Сроки и стоимости (включая подставляемые значения) – чёрные и жирные */
 .dynamic-dropdown .deadline-value,
 .dynamic-dropdown .price-value,
 .dynamic-dropdown .total-deadline,
@@ -30,6 +30,7 @@
     color: #333333;
 }
 
+/* Текст внутри селекта – чёрный */
 .dynamic-select {
     width: 100%;
     max-width: 400px;
@@ -53,6 +54,7 @@
     background-size: 20px;
 }
 
+/* Кнопка – фиолетовый фон, белый текст */
 .dynamic-dropdown .btn {
     background: #6762A7;
     color: #fff;
@@ -240,20 +242,23 @@
     resize: vertical;
 }
 
-.modal-submit-btn {
-    background: #6762A7;
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    font-family: 'Nunito Sans', sans-serif;
-    font-weight: 700;
-    border-radius: 10px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 16px;
-    transition: background 0.2s;
+/* Принудительные стили для кнопки модального окна (перебиваем Elementor) */
+#service-modal .modal-submit-btn {
+    background: #6762A7 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    font-family: 'Nunito Sans', sans-serif !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+    box-shadow: 0 4px 0 #4a457a !important;
+    width: auto !important;
+    font-size: 16px !important;
 }
 
-.modal-submit-btn:hover {
-    background: #524a8a;
+#service-modal .modal-submit-btn:active {
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 0 #4a457a !important;
 }

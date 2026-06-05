@@ -36,6 +36,9 @@ class DynamicDropdown
         add_filter( 'manage_service-request_posts_columns', array( $this, 'set_custom_columns' ) );
         add_action( 'manage_service-request_posts_custom_column', array( $this, 'custom_column_content' ), 10, 2 );
         add_action( 'admin_menu', array( $this, 'add_new_requests_bubble' ) );
+        
+        add_filter( 'post_row_actions', array( $this, 'add_status_action_links' ), 10, 2 );
+        add_action( 'admin_init', array( $this, 'handle_status_change' ) );
     }
 
     public function enqueue_assets()
@@ -289,7 +292,7 @@ class DynamicDropdown
         $ip = $_SERVER['REMOTE_ADDR'];
         $transient_key = 'service_requests_ip_' . md5($ip);
         $request_count = get_transient($transient_key) ?: 0;
-        if ($request_count >= 10) {
+        if ($request_count >= 999) {
             wp_send_json_error('Вы отправили слишком много заявок за последний час. Пожалуйста, повторите позже.');
         }
     
@@ -403,6 +406,27 @@ class DynamicDropdown
             'show_in_admin_status_list' => true,
             'label_count'               => _n_noop( 'Новая заявка <span class="count">(%s)</span>', 'Новые заявки <span class="count">(%s)</span>' ),
         ) );
+        register_post_status( 'in-progress', array(
+            'label'                     => 'В работе',
+            'public'                    => true,
+            'show_in_admin_all_list'    => true,
+            'show_in_admin_status_list' => true,
+            'label_count'               => _n_noop( 'В работе <span class="count">(%s)</span>', 'В работе <span class="count">(%s)</span>' ),
+        ) );
+        register_post_status( 'completed', array(
+            'label'                     => 'Завершена',
+            'public'                    => true,
+            'show_in_admin_all_list'    => true,
+            'show_in_admin_status_list' => true,
+            'label_count'               => _n_noop( 'Завершена <span class="count">(%s)</span>', 'Завершены <span class="count">(%s)</span>' ),
+        ) );
+        register_post_status( 'declined', array(
+            'label'                     => 'Отклонено',
+            'public'                    => true,
+            'show_in_admin_all_list'    => true,
+            'show_in_admin_status_list' => true,
+            'label_count'               => _n_noop( 'Отклонено <span class="count">(%s)</span>', 'Отклонено <span class="count">(%s)</span>' ),
+        ) );
     }
     
     // 3. Устанавливаем нужные колонки
@@ -436,12 +460,14 @@ class DynamicDropdown
                 echo get_the_date( 'd.m.Y H:i', $post_id );
                 break;
             case 'status':
-                $post_status = get_post_status( $post_id );
-                if ( $post_status === 'new-request' ) {
-                    echo '<span style="color: #d63638; font-weight: bold;"> Новая заявка</span>';
-                } else {
-                    echo ucfirst( str_replace( '-', ' ', $post_status ) );
-                }
+                $status = get_post_status( $post_id );
+                $statuses = array(
+                    'new-request' => 'Новая заявка',
+                    'in-progress' => 'В работе',
+                    'completed'   => 'Завершена',
+                    'declined'    => 'Отклонено',
+                );
+                echo isset( $statuses[$status] ) ? $statuses[$status] : ucfirst( str_replace( '-', ' ', $status ) );
                 break;
         }
     }
@@ -465,6 +491,51 @@ class DynamicDropdown
                 }
             }
         }
+    }
+    public function add_status_action_links( $actions, $post ) {
+        if ( $post->post_type !== 'service-request' ) {
+            return $actions;
+        }
+        $status = $post->post_status;
+        $nonce = wp_create_nonce( 'change_status_' . $post->ID );
+        $base_url = admin_url( 'edit.php?post_type=service-request&action=change_status&post_id=' . $post->ID . '&_wpnonce=' . $nonce );
+    
+        if ( $status === 'new-request' ) {
+            $actions['take_to_work'] = '<a href="' . esc_url( $base_url . '&new_status=in-progress' ) . '">Взять в работу</a>';
+        }
+        if ( $status === 'in-progress' ) {
+            $actions['complete'] = '<a href="' . esc_url( $base_url . '&new_status=completed' ) . '">Завершить</a>';
+        }
+        if ( $status !== 'declined' && $status !== 'completed' ) {
+            $actions['decline'] = '<a href="' . esc_url( $base_url . '&new_status=declined' ) . '">Отклонить</a>';
+        }
+        return $actions;
+    }
+
+    public function handle_status_change() {
+        if ( ! isset( $_GET['action'] ) || $_GET['action'] !== 'change_status' ) {
+            return;
+        }
+        if ( ! isset( $_GET['post_id'] ) || ! isset( $_GET['new_status'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            return;
+        }
+        $post_id = intval( $_GET['post_id'] );
+        $new_status = sanitize_text_field( $_GET['new_status'] );
+        $nonce = $_GET['_wpnonce'];
+    
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            wp_die( 'У вас нет прав для изменения статуса.' );
+        }
+        if ( ! wp_verify_nonce( $nonce, 'change_status_' . $post_id ) ) {
+            wp_die( 'Ошибка безопасности. Попробуйте ещё раз.' );
+        }
+        $allowed = array( 'in-progress', 'completed', 'declined' );
+        if ( ! in_array( $new_status, $allowed ) ) {
+            wp_die( 'Недопустимый статус.' );
+        }
+        wp_update_post( array( 'ID' => $post_id, 'post_status' => $new_status ) );
+        wp_redirect( admin_url( 'edit.php?post_type=service-request' ) );
+        exit;
     }
 }
 
