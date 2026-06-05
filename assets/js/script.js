@@ -81,16 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ ' + data.data);
+                    alert(data.data);
                     closeModal();
                     modalForm.reset();
                 } else {
-                    alert('❌ Ошибка: ' + data.data);
+                    alert('Ошибка: ' + data.data);
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('❌ Произошла ошибка при отправке. Попробуйте позже.');
+                alert('Произошла ошибка при отправке. Попробуйте позже.');
             });
         });
     }
