@@ -82,6 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const ajaxurl = (typeof serviceRequest !== 'undefined') ? serviceRequest.ajaxurl : '/wp-admin/admin-ajax.php';
             const nonce = (typeof serviceRequest !== 'undefined') ? serviceRequest.nonce : '';
             formData.append('nonce', nonce);
+            const nameValue = nameInput ? nameInput.value.trim() : '';
+            const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+            const phoneDigits = phoneValue.replace(/\D/g, '');
 
             fetch(ajaxurl, {
                 method: 'POST',
@@ -89,6 +92,16 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
+                
+                if (nameValue === '') {
+                    alert('Пожалуйста, введите ваше имя.');
+                    return;
+                }
+                if (phoneDigits.length !== 11) { // должно быть 11 цифр: 7 и 10 цифр номера
+                    alert('Введите полный номер телефона в формате +7 (XXX) XXX-XX-XX');
+                    return;
+                }
+                
                 if (data.success) {
                     alert(data.data);
                     closeModal();
@@ -220,5 +233,65 @@ function addDaToInfoStatic(container) {
         if (!original.includes('<strong>да</strong>')) {
             p.innerHTML = original + ' <strong>да</strong>';
         }
+    });
+}
+
+const nameInput = document.querySelector('.modal-form input[name="name"]');
+if (nameInput) {
+    nameInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^a-zA-Zа-яёА-ЯЁ\s\-]/g, '');
+    });
+}
+
+const phoneInput = document.querySelector('.modal-form input[name="phone"]');
+
+function formatPhoneNumber(value) {
+    // Удаляем все нецифры
+    let cleaned = value.replace(/\D/g, '');
+    
+    // Если начинается с 8, заменяем на 7 (для единообразия)
+    if (cleaned.startsWith('8')) {
+        cleaned = '7' + cleaned.slice(1);
+    }
+    
+    // Если не начинается с 7 и не пусто, добавляем 7 в начало? Нет, лучше оставить как есть, но маска будет неверна.
+    // Мы ожидаем 10 цифр после +7. Если их меньше, просто показываем частичный ввод.
+    
+    let result = '+7 ';
+    if (cleaned.length > 1) {
+        // убираем первую семёрку, если она есть
+        if (cleaned.startsWith('7')) {
+            cleaned = cleaned.slice(1);
+        }
+        // теперь cleaned содержит до 10 цифр
+        let parts = cleaned.match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        if (parts[1]) result += '(' + parts[1];
+        if (parts[2]) result += ') ' + parts[2];
+        if (parts[3]) result += '-' + parts[3];
+        if (parts[4]) result += '-' + parts[4];
+    }
+    return result.trim();
+}
+
+if (phoneInput) {
+    phoneInput.addEventListener('input', function(e) {
+        let rawValue = this.value;
+        let formatted = formatPhoneNumber(rawValue);
+        this.value = formatted;
+    });
+    
+    // Дополнительно: при потере фокуса можно валидировать длину
+    phoneInput.addEventListener('blur', function() {
+        let digits = this.value.replace(/\D/g, '');
+        if (digits.length !== 11) { // +7 + 10 цифр = 11 символов
+            // необязательная проверка, просто предупреждение
+            this.style.borderColor = '#ffaaaa';
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+    
+    phoneInput.addEventListener('focus', function() {
+        this.style.borderColor = '';
     });
 }

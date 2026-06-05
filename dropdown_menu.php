@@ -289,7 +289,7 @@ class DynamicDropdown
         $name    = sanitize_text_field( $_POST['name'] );
         $phone   = sanitize_text_field( $_POST['phone'] );
         $info    = sanitize_textarea_field( $_POST['info'] );
-       $service_title = sanitize_text_field( $_POST['service_title'] ?? '' );
+        $service_title = sanitize_text_field( $_POST['service_title'] ?? '' );
         $selected_option = sanitize_textarea_field( $_POST['selected_service'] ?? '' );
         
         if ( $service_title && $selected_option ) {
@@ -308,12 +308,12 @@ class DynamicDropdown
         }
     
         // Формируем тему письма
-        $subject = 'Новая заявка с сайта';
+        $subject = 'Новая заявка с bti';
     
         // Формируем тело письма (HTML)
         $message = "
         <html>
-        <head><title>Новая заявка bti</title></head>
+        <head><title>Новая заявка</title></head>
         <body>
             <h2>Детали заявки</h2>
             <table border='0' cellpadding='5' cellspacing='0'>
