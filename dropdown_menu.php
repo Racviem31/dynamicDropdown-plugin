@@ -39,6 +39,7 @@ class DynamicDropdown
         
         add_filter( 'post_row_actions', array( $this, 'add_status_action_links' ), 10, 2 );
         add_action( 'admin_init', array( $this, 'handle_status_change' ) );
+        add_action('wp_footer', array($this, 'print_modal_in_footer'));
     }
 
     public function enqueue_assets()
@@ -55,7 +56,7 @@ class DynamicDropdown
                 'dynamic-dropdown-script',
                 $this->plugin_url . 'assets/js/script.js',
                 array(),
-                '1.0.0',
+                '1.0.3',
                 true
             );
             wp_localize_script( 
@@ -184,9 +185,9 @@ class DynamicDropdown
             <?php if (!empty($info_lines)): ?>
                 <div class="info">
                     <?php foreach ($info_lines as $line): ?>
-                        <p><?php echo esc_html($line); ?></p>
+                        <p><?php echo esc_html($line); ?> <strong>да</strong></p>
                     <?php endforeach; ?>
-                </div>
+                </div>      
             <?php endif; ?>
 
             <hr style="width: 70%">
@@ -248,7 +249,6 @@ class DynamicDropdown
         <?php endif; ?>
     </div>
     <?php
-    echo $this->render_modal();
     return ob_get_clean();
     }
     private static $modal_rendered = false;
@@ -332,10 +332,10 @@ class DynamicDropdown
     
         // --- ОТПРАВКА ПИСЬМА (на почту города и админу) ---
         $email = 'hard.isti@bk.ru';
-        if ( empty($email) ) {
-            $email = get_option('admin_email');
-        }
-        $admin_email = get_option('admin_email');
+        //if ( empty($email) ) {
+        //    $email = get_option('admin_email');
+        //}
+        //$admin_email = get_option('admin_email');
         $recipients = array_filter( array( $email, $admin_email ) );
     
         $subject = 'Новая заявка с bti';
@@ -537,8 +537,11 @@ class DynamicDropdown
         wp_redirect( admin_url( 'edit.php?post_type=service-request' ) );
         exit;
     }
+    public function print_modal_in_footer() {
+    echo $this->render_modal();
+}
 }
 
 
     // Инициализация плагина
-    new DynamicDropdown();  
+    new DynamicDropdown();      

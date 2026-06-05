@@ -121,7 +121,11 @@ document.addEventListener('DOMContentLoaded', function() {
 // --- Функции вариантов ---
 function initVariant1(container) {
     const select = container.querySelector('.dynamic-select');
-    if (!select) return;
+    if (!select) {
+        // Статический вариант (нет селекта) – просто добавляем «да» к info_lines
+        addDaToInfoStatic(container);
+        return;
+    }
 
     const deadlineSpan = container.querySelector('.deadline-value');
     const priceSpan = container.querySelector('.price-value');
@@ -212,18 +216,49 @@ function initVariant2(container) {
         if (totalPriceSpan) totalPriceSpan.textContent = totalPrice > 0 ? formatPrice(totalPrice) : '-';
     }
 
-    checkboxes.forEach(cb => cb.addEventListener('change', recalcTotals));
-    if (checkAllBtn) checkAllBtn.addEventListener('click', () => {
-        checkboxes.forEach(cb => cb.checked = true);
-        recalcTotals();
-        checkAllBtn.blur();
-    });
-    if (uncheckAllBtn) uncheckAllBtn.addEventListener('click', () => {
-        checkboxes.forEach(cb => cb.checked = false);
-        recalcTotals();
-        uncheckAllBtn.blur();
-    });
+    // Функция, собирающая названия выбранных услуг
+    function updateSelectedServices() {
+        const checked = container.querySelectorAll('input[type="checkbox"]:checked');
+        const names = Array.from(checked).map(cb => {
+            const label = cb.closest('.service-item');
+            const strong = label ? label.querySelector('.service-content strong') : null;
+            return strong ? strong.innerText.trim() : cb.value;
+        }).join(', ');
+        const input = document.getElementById('selected-service');
+        if (input) input.value = names;
+    }
+
+    // Первоначальный расчёт и заполнение
     recalcTotals();
+    updateSelectedServices();
+
+    // Обработчики на каждый чекбокс
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            recalcTotals();
+            updateSelectedServices();
+        });
+    });
+
+    // Кнопка "Отметить все"
+    if (checkAllBtn) {
+        checkAllBtn.addEventListener('click', () => {
+            checkboxes.forEach(cb => cb.checked = true);
+            recalcTotals();
+            updateSelectedServices();
+            checkAllBtn.blur();
+        });
+    }
+
+    // Кнопка "Сбросить выбор"
+    if (uncheckAllBtn) {
+        uncheckAllBtn.addEventListener('click', () => {
+            checkboxes.forEach(cb => cb.checked = false);
+            recalcTotals();
+            updateSelectedServices();
+            uncheckAllBtn.blur();
+        });
+    }
 }
 
 function addDaToInfoStatic(container) {
