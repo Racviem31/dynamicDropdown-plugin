@@ -26,7 +26,16 @@ class DynamicDropdown
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action( 'wp_ajax_send_service_request', array( $this, 'ajax_send_request' ) );
         add_action( 'wp_ajax_nopriv_send_service_request', array( $this, 'ajax_send_request' ) );
+        // Регистрируем новый тип записи "Заявка"
+        add_action( 'init', array( $this, 'register_request_post_type' ) );
         
+        // Добавляем статус "Заявка"
+        add_action( 'init', array( $this, 'register_custom_post_status' ) );
+        
+        // Настраиваем колонки в списке заявок
+        add_filter( 'manage_service-request_posts_columns', array( $this, 'set_custom_columns' ) );
+        add_action( 'manage_service-request_posts_custom_column', array( $this, 'custom_column_content' ), 10, 2 );
+        add_action( 'admin_menu', array( $this, 'add_new_requests_bubble' ) );
     }
 
     public function enqueue_assets()
@@ -271,28 +280,31 @@ class DynamicDropdown
      * AJAX-обработчик отправки заявки
      */
     public function ajax_send_request() {
-        // Проверяем nonce для безопасности
+        // Проверка nonce
         if ( !isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'service_request_nonce') ) {
             wp_send_json_error('Ошибка безопасности. Обновите страницу и попробуйте снова.');
-            wp_die();
         }
-        // Защита от спама: ограничение 10 заявок в час с одного IP
+    
+        // Ограничение 10 заявок в час с одного IP
         $ip = $_SERVER['REMOTE_ADDR'];
         $transient_key = 'service_requests_ip_' . md5($ip);
         $request_count = get_transient($transient_key) ?: 0;
-        
         if ($request_count >= 10) {
             wp_send_json_error('Вы отправили слишком много заявок за последний час. Пожалуйста, повторите позже.');
-            wp_die();
         }
     
-        // Получаем данные из формы
-        $name    = sanitize_text_field( $_POST['name'] );
-        $phone   = sanitize_text_field( $_POST['phone'] );
-        $info    = sanitize_textarea_field( $_POST['info'] );
+        // Получение и очистка данных
+        $name    = sanitize_text_field( $_POST['name'] ?? '' );
+        $phone   = sanitize_text_field( $_POST['phone'] ?? '' );
+        $info    = sanitize_textarea_field( $_POST['info'] ?? '' );
         $service_title = sanitize_text_field( $_POST['service_title'] ?? '' );
         $selected_option = sanitize_textarea_field( $_POST['selected_service'] ?? '' );
-        
+    
+        if ( empty($name) || empty($phone) ) {
+            wp_send_json_error('Пожалуйста, заполните имя и телефон.');
+        }
+    
+        // Формируем полное название услуги
         if ( $service_title && $selected_option ) {
             $service = $service_title . ' — ' . $selected_option;
         } elseif ( $service_title ) {
@@ -301,18 +313,29 @@ class DynamicDropdown
             $service = $selected_option;
         }
     
-        // Получаем email текущего города с помощью шорткода belingoGeo
-        $email = 'hard.isti@bk.ru';
-        //$email = do_shortcode( '[belingogeo_city_content]' );
-        // Если шорткод не вернул email, используем email по умолчанию
-        if ( empty($email) ) {
-            $email = get_option( 'admin_email' );
+        // --- СОЗДАНИЕ ЗАПИСИ В АДМИНКЕ (CPT) ---
+        $post_data = array(
+            'post_title'  => $name,
+            'post_type'   => 'service-request',
+            'post_status' => 'new-request',
+        );
+        $post_id = wp_insert_post( $post_data );
+        if ( $post_id ) {
+            update_post_meta( $post_id, '_phone', $phone );
+            update_post_meta( $post_id, '_info', $info );
+            update_post_meta( $post_id, '_service_title', $service_title );
+            update_post_meta( $post_id, '_selected_service', $selected_option );
         }
     
-        // Формируем тему письма
-        $subject = 'Новая заявка с bti';
+        // --- ОТПРАВКА ПИСЬМА (на почту города и админу) ---
+        $email = 'hard.isti@bk.ru';
+        if ( empty($email) ) {
+            $email = get_option('admin_email');
+        }
+        $admin_email = get_option('admin_email');
+        $recipients = array_filter( array( $email, $admin_email ) );
     
-        // Формируем тело письма (HTML)
+        $subject = 'Новая заявка с bti';
         $message = "
         <html>
         <head><title>Новая заявка</title></head>
@@ -327,22 +350,121 @@ class DynamicDropdown
         </body>
         </html>
         ";
-    
-        // Заголовки письма (HTML)
         $headers = array('Content-Type: text/html; charset=UTF-8');
     
-        // Отправляем письмо
-
         $sent = wp_mail( $recipients, $subject, $message, $headers );
     
-        if ($sent) {
-            set_transient($transient_key, $request_count + 1, HOUR_IN_SECONDS);
-            wp_send_json_success('Ваша заявка успешно отправлена!');
+        if ( $sent ) {
+            set_transient( $transient_key, $request_count + 1, HOUR_IN_SECONDS );
+            wp_send_json_success( 'Ваша заявка успешно отправлена!' );
         } else {
-            wp_send_json_error('Ошибка при отправке заявки. Попробуйте позже.');
+            wp_send_json_error( 'Ошибка при отправке заявки. Попробуйте позже.' );
         }
-            
-        wp_die();
+    }
+    // 1. Регистрируем тип записи "Заявка"
+    public function register_request_post_type() {
+        $labels = array(
+            'name'               => 'Заявки',
+            'singular_name'      => 'Заявка',
+            'menu_name'          => 'Заявки',
+            'add_new'            => 'Добавить новую',
+            'edit_item'          => 'Редактировать заявку',
+            'new_item'           => 'Новая заявка',
+            'view_item'          => 'Просмотреть заявку',
+            'search_items'       => 'Искать заявки',
+            'not_found'          => 'Заявок не найдено',
+            'not_found_in_trash' => 'В корзине нет заявок',
+        );
+        $args = array(
+            'labels'              => $labels,
+            'public'              => false,
+            'exclude_from_search' => true,
+            'publicly_queryable'  => false,
+            'show_ui'             => true,
+            'show_in_menu'        => true,
+            'capability_type'     => 'post',
+            'capabilities' => array(
+                'create_posts' => 'do_not_allow', // запрещаем создание через админку
+            ),
+            'map_meta_cap'        => true,
+            'hierarchical'        => false,
+            'has_archive'         => false,
+            'supports'            => array( 'title' ),
+        );
+        register_post_type( 'service-request', $args );
+    }
+    
+    // 2. Регистрируем кастомный статус "Новая заявка"
+    public function register_custom_post_status() {
+        register_post_status( 'new-request', array(
+            'label'                     => 'Новая заявка',
+            'public'                    => true,
+            'show_in_admin_all_list'    => true,
+            'show_in_admin_status_list' => true,
+            'label_count'               => _n_noop( 'Новая заявка <span class="count">(%s)</span>', 'Новые заявки <span class="count">(%s)</span>' ),
+        ) );
+    }
+    
+    // 3. Устанавливаем нужные колонки
+    public function set_custom_columns( $columns ) {
+        $new_columns = array();
+        $new_columns['cb']               = $columns['cb'];
+        $new_columns['title']            = 'Имя клиента';
+        $new_columns['phone']            = 'Телефон';
+        $new_columns['service']          = 'Выбранная услуга';
+        $new_columns['request_info']     = 'Информация';
+        $new_columns['submission_time']  = 'Время заявки';
+        $new_columns['status']           = 'Статус';
+        return $new_columns;
+    }
+    
+    // 4. Заполняем колонки данными
+    public function custom_column_content( $column, $post_id ) {
+        switch ( $column ) {
+            case 'phone':
+                echo get_post_meta( $post_id, '_phone', true );
+                break;
+            case 'service':
+                $service_title = get_post_meta( $post_id, '_service_title', true );
+                $service_option = get_post_meta( $post_id, '_selected_service', true );
+                echo esc_html( $service_title . ' — ' . $service_option );
+                break;
+            case 'request_info':
+                echo get_post_meta( $post_id, '_info', true );
+                break;
+            case 'submission_time':
+                echo get_the_date( 'd.m.Y H:i', $post_id );
+                break;
+            case 'status':
+                $post_status = get_post_status( $post_id );
+                if ( $post_status === 'new-request' ) {
+                    echo '<span style="color: #d63638; font-weight: bold;"> Новая заявка</span>';
+                } else {
+                    echo ucfirst( str_replace( '-', ' ', $post_status ) );
+                }
+                break;
+        }
+    }
+    public function add_new_requests_bubble() {
+        global $menu, $submenu;
+    
+        $post_type = 'service-request';
+        $counts = wp_count_posts( $post_type );
+        $new_count = isset( $counts->{'new-request'} ) ? $counts->{'new-request'} : 0;
+    
+        if ( $new_count > 0 ) {
+            // Ищем в главном меню пункт с параметром 'edit.php?post_type=' . $post_type
+            foreach ( $menu as $key => $item ) {
+                if ( isset( $item[2] ) && $item[2] === 'edit.php?post_type=' . $post_type ) {
+                    // Добавляем бейдж к названию (которое в $item[0])
+                    $menu[$key][0] .= sprintf(
+                        ' <span class="awaiting-mod"><span class="pending-count">%d</span></span>',
+                        $new_count
+                    );
+                    break;
+                }
+            }
+        }
     }
 }
 
