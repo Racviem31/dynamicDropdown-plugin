@@ -24,6 +24,8 @@ class DynamicDropdown
 
         add_shortcode('dynamic_dropdown', array($this, 'render_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
+        add_action( 'wp_ajax_send_service_request', array( $this, 'ajax_send_request' ) );
+        add_action( 'wp_ajax_nopriv_send_service_request', array( $this, 'ajax_send_request' ) );
     }
 
     public function enqueue_assets()
@@ -42,6 +44,13 @@ class DynamicDropdown
                 array(),
                 '1.0.0',
                 true
+            );
+            wp_localize_script( 
+                'dynamic-dropdown-script', 
+                'serviceRequest', 
+                array(
+                'ajaxurl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'service_request_nonce' ))
             );
         }
     }
@@ -248,12 +257,69 @@ class DynamicDropdown
                     <input type="text" name="name" placeholder="Ваше имя" required>
                     <input type="tel" name="phone" placeholder="Номер телефона" required>
                     <textarea name="info" placeholder="Укажите необходимую информацию, которая может быть важна, или оставьте поле пустым"></textarea>
+                    <input type="hidden" name="selected_service" id="selected-service" value="">
                     <button type="submit" class="modal-submit-btn">Получить услугу</button>
                 </form>
             </div>
         </div>
         <?php
         return ob_get_clean();
+    }
+        /**
+     * AJAX-обработчик отправки заявки
+     */
+    public function ajax_send_request() {
+        // Проверяем nonce для безопасности
+        if ( !isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'service_request_nonce') ) {
+            wp_send_json_error('Ошибка безопасности. Обновите страницу и попробуйте снова.');
+            wp_die();
+        }
+    
+        // Получаем данные из формы
+        $name    = sanitize_text_field( $_POST['name'] );
+        $phone   = sanitize_text_field( $_POST['phone'] );
+        $info    = sanitize_textarea_field( $_POST['info'] );
+        $service = sanitize_textarea_field( $_POST['selected_service'] ?? '' ); // выбранный объект из селекта
+    
+        // Получаем email текущего города с помощью шорткода belingoGeo
+        $email = 'hard.isti@bk.ru';
+        // Если шорткод не вернул email, используем email по умолчанию
+        if ( empty($email) ) {
+            $email = get_option( 'admin_email' );
+        }
+    
+        // Формируем тему письма
+        $subject = 'Новая заявка с сайта';
+    
+        // Формируем тело письма (HTML)
+        $message = "
+        <html>
+        <head><title>Новая заявка bti</title></head>
+        <body>
+            <h2>Детали заявки</h2>
+            <table border='0' cellpadding='5' cellspacing='0'>
+                <tr><td><strong>Имя:</strong></td><td>{$name}</td></tr>
+                <tr><td><strong>Телефон:</strong></td><td>{$phone}</td></tr>
+                <tr><td><strong>Выбранная услуга:</strong></td><td>{$service}</td></tr>
+                <tr><td><strong>Информация:</strong></td><td>{$info}</td></tr>
+            </table>
+        </body>
+        </html>
+        ";
+    
+        // Заголовки письма (HTML)
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+    
+        // Отправляем письмо
+        $sent = wp_mail( $email, $subject, $message, $headers );
+    
+        if ( $sent ) {
+            wp_send_json_success( 'Ваша заявка успешно отправлена!' );
+        } else {
+            wp_send_json_error( 'Ошибка при отправке заявки. Попробуйте позже.' );
+        }
+    
+        wp_die();
     }
 }
 

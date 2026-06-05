@@ -1,6 +1,6 @@
 /**
  * Скрипт для плагина DynamicDropdown
- * Версия 1.1.0
+ * Версия 1.2.0 (с отправкой формы)
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -12,19 +12,91 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (variant === '2') {
             initVariant2(container);
         } else {
-            // fallback: проверяем наличие селекта или чекбоксов
             if (container.querySelector('.dynamic-select')) {
                 initVariant1(container);
             } else if (container.querySelector('input[type="checkbox"]')) {
                 initVariant2(container);
             } else {
-                // статический вариант без options – добавляем "да"
                 addDaToInfoStatic(container);
             }
         }
     });
+
+    // --- Модальное окно (открытие/закрытие) ---
+    const modal = document.getElementById('service-modal');
+    const modalOverlay = document.querySelector('.modal-overlay');
+    const modalClose = document.querySelector('.modal-close');
+
+    function getScrollbarWidth() {
+        return window.innerWidth - document.documentElement.clientWidth;
+    }
+
+    window.openModal = function() {
+        if (!modal) return;
+        const scrollbarWidth = getScrollbarWidth();
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = scrollbarWidth + 'px';
+    }
+
+    window.closeModal = function() {
+        if (!modal) return;
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+
+    // Вешаем обработчики на все кнопки .btn внутри наших шорткодов
+    document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
+    });
+
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+    if (modalOverlay) modalOverlay.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeModal();
+        }
+    });
+
+    // --- Отправка формы модального окна ---
+    const modalForm = document.querySelector('.modal-form');
+    if (modalForm) {
+        modalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(modalForm);
+            formData.append('action', 'send_service_request');
+            const ajaxurl = (typeof serviceRequest !== 'undefined') ? serviceRequest.ajaxurl : '/wp-admin/admin-ajax.php';
+            const nonce = (typeof serviceRequest !== 'undefined') ? serviceRequest.nonce : '';
+            formData.append('nonce', nonce);
+
+            fetch(ajaxurl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ' + data.data);
+                    closeModal();
+                    modalForm.reset();
+                } else {
+                    alert('❌ Ошибка: ' + data.data);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('❌ Произошла ошибка при отправке. Попробуйте позже.');
+            });
+        });
+    }
 });
 
+// --- Функции вариантов ---
 function initVariant1(container) {
     const select = container.querySelector('.dynamic-select');
     if (!select) return;
@@ -33,7 +105,6 @@ function initVariant1(container) {
     const priceSpan = container.querySelector('.price-value');
     const infoItems = container.querySelectorAll('.info p');
 
-    // Сохраняем оригинальные тексты info
     infoItems.forEach(p => {
         if (!p.getAttribute('data-original-text')) {
             p.setAttribute('data-original-text', p.innerHTML);
@@ -58,20 +129,26 @@ function initVariant1(container) {
             if (priceSpan) priceSpan.textContent = price || '-';
         }
 
+        // Обновление строк info с "да"
         infoItems.forEach(p => {
             const original = p.getAttribute('data-original-text');
             if (!original) return;
             if (placeholder) {
                 p.innerHTML = original;
             } else {
-                // Добавляем "да", если его ещё нет
                 if (!original.includes('<strong>да</strong>')) {
                     p.innerHTML = original + ' <strong>да</strong>';
                 } else {
-                    p.innerHTML = original; 
+                    p.innerHTML = original;
                 }
             }
         });
+
+        // --- ЗАПОМИНАЕМ ВЫБРАННУЮ УСЛУГУ ДЛЯ МОДАЛЬНОГО ОКНА ---
+        const selectedServiceInput = document.getElementById('selected-service');
+        if (selectedServiceInput) {
+            selectedServiceInput.value = placeholder ? '' : selectedOption.innerText;
+        }
     }
 
     updateDetails();
@@ -88,23 +165,19 @@ function initVariant2(container) {
     function extractNumber(str) {
         if (!str) return 0;
         let match = str.match(/(\d[\d\s]*)/);
-        if (match) {
-            return parseInt(match[1].replace(/\s/g, ''), 10);
-        }
+        if (match) return parseInt(match[1].replace(/\s/g, ''), 10);
         return 0;
     }
 
     function formatPrice(sum) {
         return 'от ' + sum.toLocaleString('ru-RU') + ' ₽.';
     }
-
     function formatDeadline(maxDays) {
         return 'от ' + maxDays + ' дней';
     }
 
     function recalcTotals() {
-        let maxDeadline = 0;
-        let totalPrice = 0;
+        let maxDeadline = 0, totalPrice = 0;
         checkboxes.forEach(cb => {
             if (cb.checked) {
                 const deadlineNum = extractNumber(cb.getAttribute('data-deadline'));
@@ -118,22 +191,16 @@ function initVariant2(container) {
     }
 
     checkboxes.forEach(cb => cb.addEventListener('change', recalcTotals));
-
-    if (checkAllBtn) {
-        checkAllBtn.addEventListener('click', () => {
-            checkboxes.forEach(cb => cb.checked = true);
-            recalcTotals();
-            checkAllBtn.blur();  
-        });
-    }
-
-    if (uncheckAllBtn) {
-        uncheckAllBtn.addEventListener('click', () => {
-            checkboxes.forEach(cb => cb.checked = false);
-            recalcTotals();
-            uncheckAllBtn.blur();
-        });
-    }
+    if (checkAllBtn) checkAllBtn.addEventListener('click', () => {
+        checkboxes.forEach(cb => cb.checked = true);
+        recalcTotals();
+        checkAllBtn.blur();
+    });
+    if (uncheckAllBtn) uncheckAllBtn.addEventListener('click', () => {
+        checkboxes.forEach(cb => cb.checked = false);
+        recalcTotals();
+        uncheckAllBtn.blur();
+    });
     recalcTotals();
 }
 
@@ -146,50 +213,3 @@ function addDaToInfoStatic(container) {
         }
     });
 }
-
-// Модальное окно
-const modal = document.getElementById('service-modal');
-const modalOverlay = document.querySelector('.modal-overlay');
-const modalClose = document.querySelector('.modal-close');
-
-function getScrollbarWidth() {
-    return window.innerWidth - document.documentElement.clientWidth;
-}
-
-function openModal() {
-    if (!modal) return;
-    const scrollbarWidth = getScrollbarWidth();
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    document.body.style.paddingRight = scrollbarWidth + 'px';
-}
-
-function closeModal() {
-    if (!modal) return;
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-}
-
-// Добавляем обработчики на все кнопки "ПОЛУЧИТЬ УСЛУГУ"
-document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal();
-    });
-});
-
-// Закрытие по крестику
-if (modalClose) {
-    modalClose.addEventListener('click', closeModal);
-}
-// Закрытие по оверлею
-if (modalOverlay) {
-    modalOverlay.addEventListener('click', closeModal);
-}
-// Закрытие по ESC
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
-        closeModal();
-    }
-});
