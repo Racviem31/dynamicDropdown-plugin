@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- Модальное окно (открытие/закрытие) ---
+    // Модальное окно (открытие/закрытие)
     const modal = document.getElementById('service-modal');
     const modalOverlay = document.querySelector('.modal-overlay');
     const modalClose = document.querySelector('.modal-close');
@@ -118,11 +118,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// --- Функции вариантов ---
+// Функции вариантов
 function initVariant1(container) {
     const select = container.querySelector('.dynamic-select');
     if (!select) {
-        // Статический вариант (нет селекта) – просто добавляем «да» к info_lines
+        // Статический вариант (нет селекта) – просто добавляем да к info_lines
         addDaToInfoStatic(container);
         return;
     }
@@ -170,7 +170,7 @@ function initVariant1(container) {
             }
         });
 
-        // --- ЗАПОМИНАЕМ ВЫБРАННУЮ УСЛУГУ ДЛЯ МОДАЛЬНОГО ОКНА ---
+        // ЗАПОМИНАЕМ ВЫБРАННУЮ УСЛУГУ ДЛЯ МОДАЛЬНОГО ОКНА
         const selectedServiceInput = document.getElementById('selected-service');
         if (selectedServiceInput) {
             selectedServiceInput.value = placeholder ? '' : selectedOption.innerText;
@@ -288,9 +288,7 @@ function formatPhoneNumber(value) {
     if (cleaned.startsWith('8')) {
         cleaned = '7' + cleaned.slice(1);
     }
-    
-    // Если не начинается с 7 и не пусто, добавляем 7 в начало? Нет, лучше оставить как есть, но маска будет неверна.
-    // Мы ожидаем 10 цифр после +7. Если их меньше, просто показываем частичный ввод.
+
     
     let result = '+7 ';
     if (cleaned.length > 1) {
@@ -318,7 +316,7 @@ if (phoneInput) {
     // Дополнительно: при потере фокуса можно валидировать длину
     phoneInput.addEventListener('blur', function() {
         let digits = this.value.replace(/\D/g, '');
-        if (digits.length !== 11) { // +7 + 10 цифр = 11 символов
+        if (digits.length !== 11) { 
             // необязательная проверка, просто предупреждение
             this.style.borderColor = '#ffaaaa';
         } else {

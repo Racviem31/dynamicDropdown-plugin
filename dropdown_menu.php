@@ -26,17 +26,11 @@ class DynamicDropdown
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action( 'wp_ajax_send_service_request', array( $this, 'ajax_send_request' ) );
         add_action( 'wp_ajax_nopriv_send_service_request', array( $this, 'ajax_send_request' ) );
-        // Регистрируем новый тип записи "Заявка"
         add_action( 'init', array( $this, 'register_request_post_type' ) );
-        
-        // Добавляем статус "Заявка"
         add_action( 'init', array( $this, 'register_custom_post_status' ) );
-        
-        // Настраиваем колонки в списке заявок
         add_filter( 'manage_service-request_posts_columns', array( $this, 'set_custom_columns' ) );
         add_action( 'manage_service-request_posts_custom_column', array( $this, 'custom_column_content' ), 10, 2 );
         add_action( 'admin_menu', array( $this, 'add_new_requests_bubble' ) );
-        
         add_filter( 'post_row_actions', array( $this, 'add_status_action_links' ), 10, 2 );
         add_action( 'admin_init', array( $this, 'handle_status_change' ) );
         add_action('wp_footer', array($this, 'print_modal_in_footer'));
@@ -69,9 +63,8 @@ class DynamicDropdown
         }
     }
 
-    /**
-     * Загружает данные из JSON-файла и возвращает массив
-     */
+
+    //Загружает данные из JSON-файла и возвращает массив
     private function load_json_data()
     {
         $json_file = $this->plugin_path . 'data.json';
@@ -84,9 +77,7 @@ class DynamicDropdown
         return is_array($data) ? $data : [];
     }
 
-        /**
-     * Получает данные: либо по service_id, либо по текущему URL
-     */
+     //Получает данные: либо по service_id, либо по текущему URL
     private function get_data_for_current_url($service_key = '')
     {
     $all_data = $this->load_json_data();
@@ -121,9 +112,9 @@ class DynamicDropdown
 
 
 
-    /**
-     * Рендер шорткода с данными из JSON в зависимости от URL
-     */
+
+    //Рендер шорткода с данными из JSON в зависимости от URL
+
     public function render_shortcode($atts)
     {
         
@@ -279,9 +270,9 @@ class DynamicDropdown
         <?php
         return ob_get_clean();
     }
-        /**
-     * AJAX-обработчик отправки заявки
-     */
+
+    //AJAX-обработчик отправки заявки
+  
     public function ajax_send_request() {
         // Проверка nonce
         if ( !isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'service_request_nonce') ) {
@@ -316,7 +307,6 @@ class DynamicDropdown
             $service = $selected_option;
         }
     
-        // --- СОЗДАНИЕ ЗАПИСИ В АДМИНКЕ (CPT) ---
         $post_data = array(
             'post_title'  => $name,
             'post_type'   => 'service-request',
@@ -330,7 +320,7 @@ class DynamicDropdown
             update_post_meta( $post_id, '_selected_service', $selected_option );
         }
     
-        // --- ОТПРАВКА ПИСЬМА (на почту города и админу) ---
+        // ОТПРАВКА ПИСЬМА (на почту города и админу)
         $email = 'hard.isti@bk.ru';
         //if ( empty($email) ) {
         //    $email = get_option('admin_email');

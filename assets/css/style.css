@@ -7,20 +7,17 @@
     color: #333333; /* базовый чёрный */
 }
 
-/* Заголовок и подзаголовок – жирные и чёрные */
 .dynamic-dropdown h1,
 .dynamic-dropdown .subtitle {
     font-weight: 800;
     color: #333333;
 }
 
-/* Все параграфы в .info и .details – чёрные */
 .dynamic-dropdown .info p,
 .dynamic-dropdown .details p {
     color: #333333;
 }
 
-/* Сроки и стоимости (включая подставляемые значения) – чёрные и жирные */
 .dynamic-dropdown .deadline-value,
 .dynamic-dropdown .price-value,
 .dynamic-dropdown .total-deadline,
@@ -30,7 +27,6 @@
     color: #333333;
 }
 
-/* Текст внутри селекта – чёрный */
 .dynamic-select {
     width: 100%;
     max-width: 400px;
@@ -54,7 +50,7 @@
     background-size: 20px;
 }
 
-/* Кнопка – фиолетовый фон, белый текст */
+
 .dynamic-dropdown .btn {
     background: #6762A7;
     color: #fff;
@@ -242,7 +238,6 @@
     resize: vertical;
 }
 
-/* Принудительные стили для кнопки модального окна (перебиваем Elementor) */
 #service-modal .modal-submit-btn {
     background: #6762A7 !important;
     color: #ffffff !important;
