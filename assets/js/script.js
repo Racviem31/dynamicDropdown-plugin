@@ -64,11 +64,11 @@ function initVariant1(container) {
             if (placeholder) {
                 p.innerHTML = original;
             } else {
-                // Добавляем жирное "да", если его ещё нет
+                // Добавляем "да", если его ещё нет
                 if (!original.includes('<strong>да</strong>')) {
                     p.innerHTML = original + ' <strong>да</strong>';
                 } else {
-                    p.innerHTML = original; // уже есть
+                    p.innerHTML = original; 
                 }
             }
         });
@@ -118,8 +118,22 @@ function initVariant2(container) {
     }
 
     checkboxes.forEach(cb => cb.addEventListener('change', recalcTotals));
-    if (checkAllBtn) checkAllBtn.addEventListener('click', () => { checkboxes.forEach(cb => cb.checked = true); recalcTotals(); });
-    if (uncheckAllBtn) uncheckAllBtn.addEventListener('click', () => { checkboxes.forEach(cb => cb.checked = false); recalcTotals(); });
+
+    if (checkAllBtn) {
+        checkAllBtn.addEventListener('click', () => {
+            checkboxes.forEach(cb => cb.checked = true);
+            recalcTotals();
+            checkAllBtn.blur();  
+        });
+    }
+
+    if (uncheckAllBtn) {
+        uncheckAllBtn.addEventListener('click', () => {
+            checkboxes.forEach(cb => cb.checked = false);
+            recalcTotals();
+            uncheckAllBtn.blur();
+        });
+    }
     recalcTotals();
 }
 

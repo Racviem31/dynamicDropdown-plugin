@@ -74,15 +74,31 @@
 }
 
 /* Вариант 2: чекбоксы – тексты чёрные */
-.checkbox-actions button {
-    background: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 6px 12px;
+.dynamic-dropdown .checkbox-actions button {
+    background: #6762A7;
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
     margin-right: 10px;
+    margin-bottom: 25px;
     cursor: pointer;
     font-family: 'Nunito Sans', sans-serif;
-    color: #333333;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background 0.2s ease;
 }
+
+.dynamic-dropdown .checkbox-actions button:hover {
+    background: #524a8a; /* затемнение при наведении */
+}
+.dynamic-dropdown .checkbox-actions button:active {
+    transform: translateY(1px);
+}
+.dynamic-dropdown .checkbox-actions button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(103, 98, 167, 0.5);
+}
+
 .services-list {
     margin-bottom: 20px;
 }
