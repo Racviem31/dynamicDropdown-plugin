@@ -1,60 +1,87 @@
-h1 {
-  font-size: 36px;
-  margin-bottom: 20px;
+/* Подключение шрифта Nunito Sans */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap');
+
+/* Контейнер плагина */
+.dynamic-dropdown {
+    font-family: 'Nunito Sans', sans-serif;
+    color: #333333; /* базовый чёрный */
 }
 
-.subtitle {
-  font-size: 16px;
-  margin-bottom: 15px;
+/* Заголовок и подзаголовок – жирные и чёрные */
+.dynamic-dropdown h1,
+.dynamic-dropdown .subtitle {
+    font-weight: 800;
+    color: #333333;
 }
 
-.select {
-  width: 100%;
-  max-width: 400px;
-  padding: 12px 15px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background: #fff;
-  outline: none;
-  cursor: pointer;
-  margin-bottom: 25px;
+/* Все параграфы в .info и .details – чёрные */
+.dynamic-dropdown .info p,
+.dynamic-dropdown .details p {
+    color: #333333;
 }
 
-.btn {
-  margin-top: 25px;
-  padding: 15px 25px;
-  font-size: 16px;
-  background: #bfbfbf;
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-  cursor: not-allowed;
-  box-shadow: 0 4px 0 #a5a5a5;
-  transition: all 0.2s ease;
+/* Сроки и стоимости (включая подставляемые значения) – чёрные и жирные */
+.dynamic-dropdown .deadline-value,
+.dynamic-dropdown .price-value,
+.dynamic-dropdown .total-deadline,
+.dynamic-dropdown .total-price,
+.dynamic-dropdown .details span {
+    font-weight: 800;
+    color: #333333;
 }
 
-.btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #a5a5a5;
+/* Текст внутри селекта – чёрный */
+.dynamic-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 15px;
+    font-size: 16px;
+    font-family: 'Nunito Sans', sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #333333;
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 25px;
+    /* Стрелка цвета #6762A7 */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236762A7'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
 }
 
-.btn.enabled {
-  background: #4CAF50;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #3e8e41;
+/* Кнопка – фиолетовый фон, белый текст */
+.dynamic-dropdown .btn {
+    background: #6762A7;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 4px 0 #4a457a;
 }
 
-/* Вариант 2: чекбоксы */
-.checkbox-actions {
-    margin-bottom: 20px;
+.dynamic-dropdown .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #4a457a;
 }
+
+/* Вариант 2: чекбоксы – тексты чёрные */
 .checkbox-actions button {
     background: #f0f0f0;
     border: 1px solid #ccc;
     padding: 6px 12px;
     margin-right: 10px;
     cursor: pointer;
+    font-family: 'Nunito Sans', sans-serif;
+    color: #333333;
 }
 .services-list {
     margin-bottom: 20px;
@@ -79,12 +106,13 @@ h1 {
 .service-content strong {
     display: block;
     margin-bottom: 5px;
+    color: #333333;
 }
 .service-meta {
     display: flex;
     gap: 20px;
     font-size: 0.9em;
-    color: #555;
+    color: #333333;
 }
 .total-details {
     margin: 20px 0;
@@ -92,12 +120,9 @@ h1 {
 }
 .total-details p {
     margin: 5px 0;
+    color: #333333;
 }
-.btn {
-    background: #007cba;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
+.total-deadline, .total-price {
+    font-weight: 800;
+    color: #333333;
 }
-

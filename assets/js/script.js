@@ -64,10 +64,11 @@ function initVariant1(container) {
             if (placeholder) {
                 p.innerHTML = original;
             } else {
-                if (!original.endsWith(' да')) {
-                    p.innerHTML = original + ' да';
+                // Добавляем жирное "да", если его ещё нет
+                if (!original.includes('<strong>да</strong>')) {
+                    p.innerHTML = original + ' <strong>да</strong>';
                 } else {
-                    p.innerHTML = original;
+                    p.innerHTML = original; // уже есть
                 }
             }
         });
@@ -126,8 +127,8 @@ function addDaToInfoStatic(container) {
     const infoItems = container.querySelectorAll('.info p');
     infoItems.forEach(p => {
         const original = p.innerHTML;
-        if (!original.endsWith(' да')) {
-            p.innerHTML = original + ' да';
+        if (!original.includes('<strong>да</strong>')) {
+            p.innerHTML = original + ' <strong>да</strong>';
         }
     });
 }
