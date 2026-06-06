@@ -139,12 +139,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Функции вариантов
 function initVariant1(container) {
-    const select = container.querySelector('.dynamic-select');
+        const select = container.querySelector('.dynamic-select');
     if (!select) {
-        // Статический вариант (нет селекта) – просто добавляем да к info_lines
         addDaToInfoStatic(container);
         return;
     }
+
+    function adjustSelectWidth() {
+        // Создаём временный span для измерения текста
+        const tmp = document.createElement('span');
+        tmp.style.visibility = 'hidden';
+        tmp.style.position = 'absolute';
+        tmp.style.whiteSpace = 'nowrap';
+        tmp.style.fontWeight = '400';
+        tmp.style.fontSize = '16px';
+        tmp.style.fontFamily = "'Nunito Sans', sans-serif";
+        tmp.style.padding = '0';
+        document.body.appendChild(tmp);
+
+        let maxWidth = 0;
+        const options = select.querySelectorAll('option');
+        options.forEach(opt => {
+            tmp.textContent = opt.textContent;
+            const w = tmp.offsetWidth;
+            if (w > maxWidth) maxWidth = w;
+        });
+
+        document.body.removeChild(tmp);
+
+        // Добавляем небольшой запас под стрелку и padding
+        const extra = 70; // примерно 15px padding-left + 15px padding-right + стрелка
+        select.style.width = (maxWidth + extra) + 'px';
+    }
+
+    adjustSelectWidth();
 
     const deadlineSpan = container.querySelector('.deadline-value');
     const priceSpan = container.querySelector('.price-value');
