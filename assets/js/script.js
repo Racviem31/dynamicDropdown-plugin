@@ -270,7 +270,7 @@ function initVariant2(container) {
             const label = cb.closest('.service-item');
             const strong = label ? label.querySelector('.service-content strong') : null;
             return strong ? strong.innerText.trim() : cb.value;
-        }).join(', ');
+        }).join(' | ');
         const input = document.getElementById('selected-service');
         if (input) input.value = names;
     }

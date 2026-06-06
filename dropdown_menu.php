@@ -388,7 +388,14 @@ public function render_shortcode($atts) {
     
         // Формируем полное название услуги
         if ( $service_title && $selected_option ) {
-            $service = $service_title . ' — ' . $selected_option;
+            $service = implode(' — ', array_filter([$service_title, $selected_option]));
+            
+            // Заменяем '|' на цветной разделитель
+            $service_html = str_replace(
+                '|',
+                '<span style="color: #F6A723;">|</span>',
+                esc_html($service)
+            );
         } elseif ( $service_title ) {
             $service = $service_title;
         } else {
@@ -425,7 +432,7 @@ public function render_shortcode($atts) {
             <table border='0' cellpadding='5' cellspacing='0'>
                 <tr><td><strong>Имя:</strong></td><td>{$name}</td></tr>
                 <tr><td><strong>Телефон:</strong></td><td>{$phone}</td></tr>
-                <tr><td><strong>Выбранная услуга:</strong></td><td>{$service}</td></tr>
+                <tr><td><strong>Выбранная услуга:</strong></td><td>{$service_html}</td></tr>
                 <tr><td><strong>Информация:</strong></td><td>{$info}</td></tr>
             </table>
         </body>
@@ -527,10 +534,23 @@ public function render_shortcode($atts) {
                 echo get_post_meta( $post_id, '_phone', true );
                 break;
             case 'service':
-                $service_title = get_post_meta( $post_id, '_service_title', true );
-                $service_option = get_post_meta( $post_id, '_selected_service', true );
-                echo esc_html( $service_title . ' — ' . $service_option );
-                break;
+                    $service_title  = get_post_meta($post_id, '_service_title', true);
+                    $service_option = get_post_meta($post_id, '_selected_service', true);
+                
+                    // Если есть выбранные опции, разбиваем по "|" и вставляем цветной разделитель
+                    if (!empty($service_option) && strpos($service_option, '|') !== false) {
+                        $parts = array_map('esc_html', explode('|', $service_option));
+                        $service_option_formatted = implode(
+                            ' <span style="color: #F6A723;">|</span> ',
+                            $parts
+                        );
+                    } else {
+                        $service_option_formatted = esc_html($service_option);
+                    }
+                
+                    // Выводим заголовок услуги + опции
+                    echo esc_html($service_title) . ' — ' . $service_option_formatted;
+                    break;
             case 'request_info':
                 echo get_post_meta( $post_id, '_info', true );
                 break;
