@@ -426,14 +426,32 @@ public function render_shortcode($atts) {
             update_post_meta( $post_id, '_service_title', $service_title );
             update_post_meta( $post_id, '_selected_service', $selected_option );
         }
-    
-        // ОТПРАВКА ПИСЬМА (на почту города и админу)
-        $email = 'hard.isti@bk.ru';
-        //$email = do_shortcode( '[belingogeo_city_content]' );
-        //if ( empty($email) ) {
-        //    $email = get_option('admin_email');
-        //}
-        //$admin_email = get_option('admin_email');
+        
+        // --- Получаем slug текущего города ---
+        $city_slug = trim( do_shortcode( '[belingogeo_city_field field="city_slug"]' ) );
+        
+        // Массив соответствия slug → email
+        $city_emails = [
+            'abakan-2'   => 'bti@19bti.ru',
+            'abaza'      => 'abaza@19bti.ru',
+            'askiz'      => 'askiz@19bti.ru',
+            'belyj-yar'  => 'altai@19bti.ru',
+            'beya'       => 'beya@19bti.ru',
+            'sayanogorsk'=> 'sayan@19bti.ru',
+            'sorsk'      => 'sorsk@19bti.ru',
+            'tashtyp'    => 'tashtyp@19bti.ru',
+            'ust-abakan' => 'u-abakan@19bti.ru',
+            'cheremushki'=> 'cheremyski@19bti.ru',
+            'chernogorsk'=> 'chernogorsk@19bti.ru',
+            'shira'      => 'shira@19bti.ru',
+        ];
+        
+        // Если город найден – берём email из массива, иначе – email администратора
+        if ( ! empty( $city_slug ) && isset( $city_emails[ $city_slug ] ) ) {
+            $email = $city_emails[ $city_slug ];
+        } else {
+            $email = get_option( 'admin_email' );
+        }
         $recipients = array_filter( array( $email, $admin_email ) );
     
         $subject = 'Новая заявка с bti';
