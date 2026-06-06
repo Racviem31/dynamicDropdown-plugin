@@ -321,12 +321,11 @@ public function render_shortcode($atts) {
             </div>
         
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
-        
-            <!-- Скрытые поля для передачи данных в JS -->
-            <input type="hidden" class="service-option-id" value="<?php echo esc_attr($option_key); ?>">
-            <input type="hidden" class="service-option-name" value="<?php echo esc_attr($opt_name); ?>">
-            <input type="hidden" class="service-title-hidden" value="<?php echo esc_attr($title); ?>">
+            
         <?php endif; ?>
+        <input type="hidden" class="service-option-id" value="<?php echo esc_attr($option_key); ?>">
+        <input type="hidden" class="service-option-name" value="<?php echo esc_attr($opt_name); ?>">
+        <input type="hidden" class="service-title-hidden" value="<?php echo esc_attr($title); ?>">
     </div>
     <?php
     return ob_get_clean();
