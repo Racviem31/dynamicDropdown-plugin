@@ -115,32 +115,77 @@ class DynamicDropdown
 
     //Рендер шорткода с данными из JSON в зависимости от URL
 
-    public function render_shortcode($atts)
-    {
-        
+public function render_shortcode($atts) {
     self::$instance_counter++;
     $instance_id = self::$instance_counter;
-    
+
     $atts = shortcode_atts(array(
-        'height'   => '100px',
-        'position' => 'center',
-        'variant'  => '1',
-        'service'  => '',
-        'show_title' => 'true' 
+        'height'           => '100px',
+        'position'         => 'center',
+        'variant'          => '1',
+        'service'          => '',
+        'show_title'       => 'true',
+        'show_subtitle'    => 'true',
+        'show_info'        => 'true',   // управляет блоком info_lines
+        'show_select'      => 'true',   // показывать ли селект
+        'show_option_name' => '',        // auto — если option задан, то false, иначе true
+        'option'           => '',        // id конкретной опции
     ), $atts);
 
     $service_key = sanitize_text_field($atts['service']);
-    $data = $this->get_data_for_current_url($service_key); // передаём ключ
+    $data = $this->get_data_for_current_url($service_key);
     $variant = (int)$atts['variant'];
 
-    // Общие данные
+    $show_title    = filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN);
+    $show_subtitle = filter_var($atts['show_subtitle'], FILTER_VALIDATE_BOOLEAN);
+    $show_info     = filter_var($atts['show_info'], FILTER_VALIDATE_BOOLEAN);
+    $show_select   = filter_var($atts['show_select'], FILTER_VALIDATE_BOOLEAN);
+    $option_key    = sanitize_text_field($atts['option']);
+
+    // Поиск конкретной опции, если указан option
+    $selected_option = null;
+    if (!empty($option_key) && !empty($data['options'])) {
+        foreach ($data['options'] as $opt) {
+            if (isset($opt['id']) && $opt['id'] === $option_key) {
+                $selected_option = $opt;
+                break;
+            }
+            // для обратной совместимости — поиск по числовому индексу
+            if (is_numeric($option_key) && isset($data['options'][(int)$option_key])) {
+                $selected_option = $data['options'][(int)$option_key];
+                break;
+            }
+        }
+    }
+
+    // Логика отображения названия опции
+    if ($atts['show_option_name'] === '') {
+        // автоопределение: показываем, если селект активен и опция не зафиксирована
+        $show_option_name = (empty($option_key) && $show_select);
+    } else {
+        $show_option_name = filter_var($atts['show_option_name'], FILTER_VALIDATE_BOOLEAN);
+    }
+
     $title = $data['title'] ?? 'Изготовление технического паспорта';
-    $subtitle = $data['subtitle'] ?? 'Пожалуйста, выберите объект для изготовления технического паспорта:';
+    $subtitle = $data['subtitle'] ?? '';
     $info_lines = $data['info_lines'] ?? [];
+
+    // Если выбран конкретный option, deadline/price берём из него
+    if ($selected_option) {
+        $deadline = $selected_option['deadline'] ?? '-';
+        $price    = $selected_option['price'] ?? '-';
+        $opt_name = $selected_option['name'] ?? $selected_option['id'] ?? 'Услуга';
+    } else {
+        // статический вариант (без options) или когда option не указан
+        $deadline = $data['deadline'] ?? '-';
+        $price    = $data['price'] ?? '-';
+        $opt_name = '';
+    }
 
     ob_start();
     ?>
     <div class="container dynamic-dropdown dynamic-dropdown-<?php echo $instance_id; ?>" data-variant="<?php echo $variant; ?>">
+        
         <?php if (filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN)): ?>
             <h1><?php echo esc_html($title); ?></h1>
         <?php endif; ?>
@@ -191,52 +236,96 @@ class DynamicDropdown
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
 
         <?php elseif ($variant === 1 || !isset($data['options']) || empty($data['options'])): ?>
-            <!-- Первый вариант -->
-            <?php if (isset($data['options']) && is_array($data['options']) && !empty($data['options'])): ?>
+            <!-- Первый вариант (модифицированный) -->
+        
+            <?php
+            // --- Определяем, есть ли список опций и выбрана ли конкретная ---
+            $has_options = isset($data['options']) && is_array($data['options']) && !empty($data['options']);
+            // Если option задан, ищем конкретную опцию
+            $selected_option = null;
+            if (!empty($option_key) && $has_options) {
+                foreach ($data['options'] as $opt) {
+                    if (isset($opt['id']) && $opt['id'] === $option_key) {
+                        $selected_option = $opt;
+                        break;
+                    }
+                    // Для обратной совместимости — поиск по числовому индексу
+                    if (is_numeric($option_key) && isset($data['options'][(int)$option_key])) {
+                        $selected_option = $data['options'][(int)$option_key];
+                        break;
+                    }
+                }
+            }
+        
+            // Автоопределение видимости названия опции
+            if ($atts['show_option_name'] === '') {
+                $show_option_name = (empty($option_key) && $show_select); // показываем только когда селект активен
+            } else {
+                $show_option_name = filter_var($atts['show_option_name'], FILTER_VALIDATE_BOOLEAN);
+            }
+        
+            // Если выбрана конкретная опция, берём из неё срок и цену
+            if ($selected_option) {
+                $deadline = $selected_option['deadline'] ?? '-';
+                $price    = $selected_option['price'] ?? '-';
+                $opt_name = $selected_option['name'] ?? $selected_option['id'] ?? 'Услуга';
+            } else {
+                // Иначе — статический вариант (если options нет) или показываем начальные значения
+                $deadline = $data['deadline'] ?? '-';
+                $price    = $data['price'] ?? '-';
+                $opt_name = '';
+            }
+            ?>
+        
+            <?php if ($show_subtitle && !empty($subtitle)): ?>
                 <p class="subtitle"><?php echo esc_html($subtitle); ?></p>
+            <?php endif; ?>
+        
+            <?php
+            // --- Селект показываем, только если есть опции, нет зафиксированной опции, и show_select = true ---
+            if ($has_options && $show_select && empty($option_key)): ?>
                 <select class="select dynamic-select">
                     <option hidden disabled selected>Выберите объект</option>
-                    <?php foreach ($data['options'] as $index => $opt): ?>
-                        <option value="<?php echo esc_attr($index); ?>"
-                                data-deadline="<?php echo esc_attr($opt['deadline'] ?? '-'); ?>"
-                                data-price="<?php echo esc_attr($opt['price'] ?? '-'); ?>">
-                            <?php echo esc_html($opt['name']); ?>
+                    <?php foreach ($data['options'] as $index => $opt): 
+                        $opt_id = $opt['id'] ?? $index;
+                        $opt_label = $opt['name'] ?? 'Опция ' . $opt_id;
+                        $opt_deadline = $opt['deadline'] ?? '-';
+                        $opt_price = $opt['price'] ?? '-';
+                    ?>
+                        <option value="<?php echo esc_attr($opt_id); ?>"
+                                data-deadline="<?php echo esc_attr($opt_deadline); ?>"
+                                data-price="<?php echo esc_attr($opt_price); ?>">
+                            <?php echo esc_html($opt_label); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
-
+            <?php endif; ?>
+        
+            <?php if ($show_info && !empty($info_lines)): ?>
                 <div class="info">
                     <?php foreach ($info_lines as $line): ?>
-                        <p><?php echo esc_html($line); ?></p>
+                        <p><?php echo esc_html($line); ?> <strong>да</strong></p>
                     <?php endforeach; ?>
-                </div>
-
-                <hr style="width: 70%">
-
-                <div class="details">
-                    <p>Срок изготовления: <span class="deadline-value">-</span></p>
-                    <p>Стоимость услуги: <span class="price-value">-</span></p>
-                </div>
-            <?php else: ?>
-                <!-- Без options (статическая версия) -->
-                <?php
-                $deadline = $data['deadline'] ?? '-';
-                $price = $data['price'] ?? '-';
-                ?>
-                <div class="info">
-                    <?php foreach ($info_lines as $line): ?>
-                        <p><?php echo esc_html($line); ?></p>
-                    <?php endforeach; ?>
-                </div>
-
-                <hr style="width: 70%">
-
-                <div class="details">
-                    <p>Срок изготовления: <span><?php echo esc_html($deadline); ?></span></p>
-                    <p>Стоимость услуги: <span><?php echo esc_html($price); ?></span></p>
                 </div>
             <?php endif; ?>
+        
+            <?php if ($show_option_name && !empty($opt_name)): ?>
+                <p class="selected-option-name"><strong><?php echo esc_html($opt_name); ?></strong></p>
+            <?php endif; ?>
+        
+            <hr style="width: 70%">
+        
+            <div class="details">
+                <p>Срок изготовления: <span class="deadline-value"><?php echo esc_html($deadline); ?></span></p>
+                <p>Стоимость услуги: <span class="price-value"><?php echo esc_html($price); ?></span></p>
+            </div>
+        
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
+        
+            <!-- Скрытые поля для передачи данных в JS -->
+            <input type="hidden" class="service-option-id" value="<?php echo esc_attr($option_key); ?>">
+            <input type="hidden" class="service-option-name" value="<?php echo esc_attr($opt_name); ?>">
+            <input type="hidden" class="service-title-hidden" value="<?php echo esc_attr($title); ?>">
         <?php endif; ?>
     </div>
     <?php

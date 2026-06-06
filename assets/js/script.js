@@ -46,20 +46,39 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.paddingRight = '';
     }
 
-   document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        // Находим контейнер текущего шорткода
-        const container = btn.closest('.dynamic-dropdown');
-        if (container) {
-            const titleElement = container.querySelector('h1');
-            const serviceTitle = titleElement ? titleElement.innerText.trim() : '';
+    document.querySelectorAll('.dynamic-dropdown .btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const container = btn.closest('.dynamic-dropdown');
+            if (!container) return;
+    
             const titleField = document.getElementById('service-title-field');
-            if (titleField) titleField.value = serviceTitle;
-        }
-
-        openModal();
+            const selectedField = document.getElementById('selected-service');
+            if (titleField) {
+                const titleEl = container.querySelector('h1');
+                titleField.value = titleEl ? titleEl.innerText.trim() : '';
+            }
+            if (selectedField) {
+                const nameHidden = container.querySelector('.service-option-name');
+                const idHidden = container.querySelector('.service-option-id');
+                const titleField = document.getElementById('service-title-field');
+                if (titleField) {
+                    const hiddenTitle = container.querySelector('.service-title-hidden');
+                    titleField.value = hiddenTitle ? hiddenTitle.value : '';
+                }
+                if (nameHidden && nameHidden.value.trim() !== '') {
+                    selectedField.value = nameHidden.value.trim();
+                } else if (idHidden && idHidden.value.trim() !== '') {
+                    selectedField.value = idHidden.value.trim();
+                } else {
+                    // старая логика для селекта
+                    const select = container.querySelector('.dynamic-select');
+                    if (select && select.selectedIndex > 0) {
+                        selectedField.value = select.options[select.selectedIndex].innerText;
+                    }
+                }
+            }
+            openModal();
         });
     });
 
