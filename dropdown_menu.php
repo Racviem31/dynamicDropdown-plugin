@@ -229,8 +229,14 @@ public function render_shortcode($atts) {
             <hr style="width: 70%">
 
             <div class="total-details">
-                <p>Итоговые сроки: <span class="total-deadline">-</span></p>
-                <p>Итоговая стоимость: <span class="total-price">-</span></p>
+                <p>
+                    <span class="details-label">Итоговые сроки:</span>
+                    <span class="details-value total-deadline">-</span>
+                </p>
+                <p>
+                    <span class="details-label">Итоговая стоимость:</span>
+                    <span class="details-value total-price">-</span>
+                </p>
             </div>
 
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
@@ -316,8 +322,14 @@ public function render_shortcode($atts) {
             <hr style="width: 70%">
         
             <div class="details">
-                <p>Срок изготовления: <span class="deadline-value"><?php echo esc_html($deadline); ?></span></p>
-                <p>Стоимость услуги: <span class="price-value"><?php echo esc_html($price); ?></span></p>
+                <p>
+                <span class="details-label">Срок изготовления:</span>
+                <span class="details-value deadline-value"><?php echo esc_html($deadline); ?></span>
+                </p>
+                <p>
+                <span class="details-label">Стоимость услуги:</span>
+                <span class="details-value price-value"><?php echo esc_html($price); ?></span>
+                </p>
             </div>
         
             <button class="btn">ПОЛУЧИТЬ УСЛУГУ</button>
@@ -417,6 +429,7 @@ public function render_shortcode($atts) {
     
         // ОТПРАВКА ПИСЬМА (на почту города и админу)
         $email = 'hard.isti@bk.ru';
+        //$email = do_shortcode( '[belingogeo_city_content]' );
         //if ( empty($email) ) {
         //    $email = get_option('admin_email');
         //}
